@@ -52,8 +52,26 @@
     sentence of can be represented and then categorized\cite{allahyari2017brief}. 
     Mathematically, the classification model can be represented as:
     $$f:\mathcal{D}\rightarrow\mathcal{L}$$
-    where $\mathcal{D}=\{d_0, d_1,\ldots\, d_{n-1}\}$ is the set of documents 
-    (sentence), and $\mathcal{L}=\{l_0, l_1,\ldots\, l_{k-1}\}$ is the set of labels.
+    where $\mathcal{D}=\{d_0, d_1,\ldots, d_{n-1}\}$ is the set of sentences
+    (sentence), and $\mathcal{L}=\{l_0, l_1,\ldots, l_{k-1}\}$ is the set of labels.
+    Depending on whether multiple label is allow to assigned to a document, the 
+    classification is called soft or hard\cite{gopal2010multilabel}.
+    
+    The performance of sentence classification can be evaluated with F-1 score?
+    which can be defined as\cite{forman2003extensive}:
+    $$F_1=\frac{2}{\frac{1}{r}+\frac{1}{p}}=\frac{2pr}{p+r}$$
+    where $p=\frac{tpr}{tpr+fpr}$ stands for precision and $r=\frac{tpr}{tpr+fnr}$ 
+    stands for recall.
+    
+    Historically, sentence classification had been done via methods based on 
+    statistics and machine learning like naive Bayes, nearest neighbor, decision 
+    tree, SVM, etc. In this proposal, we decide to implement sentence classifier
+    using convolutional neural network (CNN), a deep learning model. By definition
+    CNN uses multiple layers of convolving filters that apply on input data and 
+    calculate the output after all layers of iteration. Although originally 
+    build for computer vision, CNN has shown quite significant potentials in 
+    natural language processing (NLP), especially in sentence classification
+    \cite{kim2014convolutional}.
 
 \section{Proposed System Model}
 
