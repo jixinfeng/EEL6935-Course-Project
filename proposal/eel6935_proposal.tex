@@ -1,5 +1,5 @@
 \documentclass[conference]{IEEEtran}
-
+\usepackage{amssymb}
 \hyphenation{op-tical net-works semi-conduc-tor}
 
 \begin{document}
@@ -49,7 +49,7 @@
     In this course project, we are aiming at a specific domain of text analysis
     job -- sentence classification. The goal of sentence classification is to assign
     proper pre-defined labels to a given sentence, so that the main subject of the 
-    sentence of can be represented and then categorized\cite{allahyari2017brief}. 
+    sentence can be represented and then categorized\cite{allahyari2017brief}. 
     Mathematically, the classification model can be represented as:
     $$f:\mathcal{D}\rightarrow\mathcal{L}$$
     where $\mathcal{D}=\{d_0, d_1,\ldots, d_{n-1}\}$ is the set of sentences
@@ -74,7 +74,35 @@
     \cite{kim2014convolutional}.
 
 \section{Proposed System Model}
+The model architecture applied is based of from Yoon Kim (2014). The architecture 
+consists of a word embedding layer, convolution layer, pooling layer and a connected
+layer. 
 
+ Let $x_{i} \in \mathbb{R}^k$ be a dimentional word vector representing the $i$-th word in the 
+ sentence. Thus, the sentence would be represented by 
+ \begin{equation}
+ x_{1:n} = x_1 \oplus x_2 \oplus ... \oplus x_n
+ \end{equation}
+ Where $\oplus$ signifies concatenation. Suppose $x_{i:i+j}$ refers to concatenating 
+ word vectors $x_i, x_{i+1}, ... , x_{i+j}$. The convolution operator with a filter $W \in \mathbb{R}^{hk}$ applied to a window size of $h$ 
+ words is defined as 
+ \begin{equation}
+ c_i = f(W \cdot x_{i:i_{h-1}} + b)
+ \end{equation}
+ Where $b$ is a bias term and $f$ signifies a non linear function such as the hyperbolic tangent. We use this
+ filter to generate a feature map $c = [c_1, c_2, ... ,x_{n-h+1}]$ with $c \in \mathbb{R}^{n-h+1}$ by applying the filter to each possible window of words in the sentence $x_{1:h}, x_{2:h+1}, ... ,x_{n-h+1:n}$. 
+ The model uses multiple filters with varying window sizes to obtain multiple features. 
+ A max-over-time pooling operation $\hat{c}$ = max\{$c$\} is applied once the feature maps are generated. 
+ The pooling operation outputs the largest value from each individual feature maps. 
+ We will employ dropout on the penultimate layer $z = [\hat{c}_1,...,\hat{c}_m]$ (while we have $m$ filters) for regularization with a constraint on $l_2$-norms of the weight vectors. This prevents co-adaptation of hidden units by randomly setting weights to zero for selected neurons.  The function is expressed as below: 
+ \begin{equation}
+ y = W \cdot (z \circ r) + b
+ \end{equation}
+where $\circ$ is the element-wise multiplication operator and $r \in \mathbb{R}^m$ is the masking vector of Bernoulli random variables 
+with probability $p$ of being 1. The gradients backpropagated through the unmasked units during training. At test time, the learned weight vectors are scaled by $p$ such that $\hat{w} = pw$ and $\hat{w}$ is used to score unseen sentences. 
+In addition, we constrain $l_2$-norms of the weight vectors by rescaling $w$ to have $||w||_2 = s$ whenever $||w||_2 > s$ after a gradient decent step. 
+
+ 
 \section{Proposed Simulation Scenarios}
 
 \section{Conclusion}
