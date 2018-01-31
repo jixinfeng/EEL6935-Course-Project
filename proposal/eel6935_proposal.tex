@@ -74,7 +74,7 @@
     \cite{kim2014convolutional}.
 
 \section{Proposed System Model}
-The model architecture applied is based of from Yoon Kim (2014). The architecture 
+The model architecture applied is based on the research of Y. Kim \cite{kim2014convolutional}. The architecture 
 consists of a word embedding layer, convolution layer, pooling layer and a connected
 layer. 
 
@@ -102,7 +102,6 @@ where $\circ$ is the element-wise multiplication operator and $r \in \mathbb{R}^
 with probability $p$ of being 1. The gradients backpropagated through the unmasked units during training. At test time, the learned weight vectors are scaled by $p$ such that $\hat{w} = pw$ and $\hat{w}$ is used to score unseen sentences. 
 In addition, we constrain $l_2$-norms of the weight vectors by rescaling $w$ to have $||w||_2 = s$ whenever $||w||_2 > s$ after a gradient decent step. 
 
- 
 \section{Proposed Simulation Scenarios}
 
 \section{Conclusion}
