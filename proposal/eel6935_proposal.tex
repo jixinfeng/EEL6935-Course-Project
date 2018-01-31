@@ -77,7 +77,6 @@
     \cite{kim2014convolutional}. 
 
 \section{Proposed System Model}
-<<<<<<< HEAD
 The model architecture applied is based on the research of Y. Kim \cite{kim2014convolutional}. The architecture 
 consists of a word embedding layer, convolution layer, pooling layer and a connected
 layer. 
@@ -106,7 +105,6 @@ where $\circ$ is the element-wise multiplication operator and $r \in \mathbb{R}^
 with probability $p$ of being 1. The gradients backpropagated through the unmasked units during training. At test time, the learned weight vectors are scaled by $p$ such that $\hat{w} = pw$ and $\hat{w}$ is used to score unseen sentences. 
 In addition, we constrain $l_2$-norms of the weight vectors by rescaling $w$ to have $||w||_2 = s$ whenever $||w||_2 > s$ after a gradient decent step. 
 
-=======
      Our chosen network architecture is based upon Yoon Kim's work on sentence
      classification in 2014. The architecture consists of four main parts: a word
      embedding layer, a convolution layer, a pooling layer and a fully connected layer
@@ -116,7 +114,7 @@ In addition, we constrain $l_2$-norms of the weight vectors by rescaling $w$ to 
      in 2013\cite{word2vec}, allow us to represent a word as a vector in
      multi-dimensional space, and they form the basis for feeding text into our deep
      learning model.
-	
+
      Let $x_{i} \in \mathbb{R}^k$ be a dimentional word vector representing the $i$-th word in the 
      sentence. Thus, the sentence would be represented by 
      \begin{equation}
@@ -154,8 +152,7 @@ In addition, we constrain $l_2$-norms of the weight vectors by rescaling $w$ to 
       is used to score unseen sentences. Finally, we will constrain $l_2$-norms of the weight 
       vectors by rescaling $w$ to have $||w||_2 = s$ whenever $||w||_2 > s$ after a gradient
       decent step.
- 
->>>>>>> 06f3c0173b8b34f7f8c8f214bb5082bf9507ef0d
+      
 \section{Proposed Simulation Scenarios}
       To test and evaluated our model, we propose using
 \section{Conclusion}
