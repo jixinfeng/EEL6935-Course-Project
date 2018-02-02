@@ -154,7 +154,22 @@ In addition, we constrain $l_2$-norms of the weight vectors by rescaling $w$ to 
       decent step.
       
 \section{Proposed Simulation Scenarios}
-      To test and evaluated our model, we propose using
+      To test and evaluate our model, we propose using the Stanford Large Movie Review 
+      Dataset to preform sentiment classification. The dataset contains 50,000 highly polar
+      movie reviews, and we score each movie review in the test set as either positive or 
+      negative. When evaulating this data set, we will use a 60/20/20 split for training,
+      development, and testing\cite{maas-EtAl:2011:ACL-HLT2011}.
+      
+      In addition to using the above data set, we will also train and test using the Stanford Sentiment 
+      Treebank, which is one of the data sets Kim evaluated in his paper. Using the same data set
+      will allow us to compare our model with Kim's model directly. Both binary (positive/negative)
+      and fine-grained (scale from 1-5) classification tasks will be performed and scored for accuracy.
+      For all tasks, we will compute the accuracy of our model by diving the number of correct classifications
+      by the total number of test samples\cite{sentimenttreebank}.
+
+      We will also investigate how well our model generalizes to different sentiment analysis problems 
+      by training our model on each data set in turn and then evaluating our model on the data set it
+      was not trained with.
 \section{Conclusion}
 The conclusion goes here.
 
