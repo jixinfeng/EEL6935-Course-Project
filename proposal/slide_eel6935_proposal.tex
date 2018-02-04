@@ -112,7 +112,13 @@
 
 \begin{frame}
 \frametitle{System Model}
-    
+    We model a sentence as:
+    $$x_{1:n} = x_1 \oplus x_2 \oplus ... \oplus x_n$$
+    \begin{itemize}
+        \item $x_{i} \in \mathbb{R}^k$: dimensional word vector representing the $i$-th word in the sentence
+        \item $\oplus$ signifies concatenation
+        \item $x_{i:i+j}$: concatenating word vectors $x_i, x_{i+1}, ... , x_{i+j}$
+    \end{itemize}
 \end{frame}
 
 \begin{frame}
