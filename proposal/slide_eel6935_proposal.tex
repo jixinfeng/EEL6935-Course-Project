@@ -84,12 +84,24 @@
         \item $\mathcal{D}=\{d_0, d_1,\ldots, d_{n-1}\}$ is the set of sentence
         \item $\mathcal{L}=\{l_0, l_1,\ldots, l_{k-1}\}$ is the set of labels.
     \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Evaluation}
+\begin{columns}
+    \begin{column}{0.65\textwidth}
     The performance can be measured by $F_1$ Score:
     $$F_1=\frac{2}{\frac{1}{r}+\frac{1}{p}}=\frac{2pr}{p+r}$$
     \begin{itemize}
         \item Precision: $p=\frac{tpr}{tpr+fpr}$
         \item Recall: $r=\frac{tpr}{tpr+fnr}$
     \end{itemize}
+    \end{column}
+    \begin{column}{0.35\textwidth}
+        \center\includegraphics[width=\textwidth]{figure/precision_recall}
+    \end{column}
+    \end{columns}
+    \footnotetext{figure credit: \url{https://en.wikipedia.org/wiki/F1_score}}
 \end{frame}
 
 \begin{frame}
@@ -107,17 +119,64 @@
     \end{itemize}
     \end{column}
     \end{columns}
-    \footnotetext{Plot credit: http://www.wildml.com/2015/11/understanding-convolutional-neural-networks-for-nlp/}
+    \footnotetext{figure credit: http://www.wildml.com/2015/11/understanding-convolutional-neural-networks-for-nlp/}
 \end{frame}
 
 \begin{frame}
-\frametitle{System Model}
+\frametitle{System Model: Sentence}
     We model a sentence as:
     $$x_{1:n} = x_1 \oplus x_2 \oplus ... \oplus x_n$$
     \begin{itemize}
         \item $x_{i} \in \mathbb{R}^k$: dimensional word vector representing the $i$-th word in the sentence
         \item $\oplus$ signifies concatenation
         \item $x_{i:i+j}$: concatenating word vectors $x_i, x_{i+1}, ... , x_{i+j}$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{System Model: Convolution}
+    Convolution operator is defined as:
+    $$c_i = f(W \cdot x_{i:i_{h-1}} + b)$$
+    \begin{itemize}
+        \item $W \in \mathbb{R}^{hk}$: filter
+        \item $h$: window size
+        \item $b$: bias term
+        \item $f$: signifies a non linear function
+    \end{itemize}
+    Feature map
+    $$c = [c_1, c_2, ... ,x_{n-h+1}], c \in \mathbb{R}^{n-h+1}$$
+    is then applied to 
+    $$x_{1:h}, x_{2:h+1}, ... ,x_{n-h+1:n}$$
+\end{frame}
+
+\begin{frame}
+\frametitle{System Model: Output}
+    Dropout on the penultimate layer 
+    $$z = [\hat{c}_1,...,\hat{c}_m], \hat{c}=\operatorname{max}\{c\}$$
+    The final output is:
+    $$y = W \cdot (z \circ r) + b$$
+    \begin{itemize}
+    \item $\circ$: element-wise multiplication operator
+    \item $r \in \mathbb{R}^m$: masking vector of Bernoulli random variables
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Simulation Proposal}
+    \begin{itemize}
+        \item Propose using the Stanford Large Movie Review Dataset
+        \begin{itemize}
+            \item 50,000 highly polar movie reviews
+        \end{itemize}
+        \item Score each movie review as either positive or negative
+        \item Use a 60/20/20 split for training, development, and testing
+        \item Code in Python with Tensorflow
+        \item simulations will be conducted on computers with 
+        \begin{itemize}
+            \item 3.1GHz Intel Core i7 CPU with 8MB cache
+            \item 16GB RAM
+            \item Ubuntu 14.04 LTS
+        \end{itemize}
     \end{itemize}
 \end{frame}
 
