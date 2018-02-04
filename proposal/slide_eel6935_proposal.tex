@@ -43,9 +43,11 @@
 % \vspace*{-0.1in}
 \begin{center}
   {\color[RGB]{241,243,186}
-{\huge EEL6935 Course Project Proposal}\\
+{\huge EEL6935 Course Project Proposal\\
+    \vspace*{0.5em}
+    Sentence Classification Using a CNN}\\
   \vspace*{1.8in}
-{\bf presenter's name}, name, name \\
+    Caleb Bryent, {\bf Jixin Feng}, Hao Huang \\
     \vspace*{1em}
   \begin{tabular}{cc}
   University of Florida
@@ -56,8 +58,60 @@
 \end{frame}}
 
 \begin{frame}
-\frametitle{test}
-test frame
+\frametitle{Background}
+    \begin{columns}
+    \begin{column}{0.5\textwidth}
+    \begin{itemize}
+        \item Tremendous volume of unstructured text generated everyday
+        \item 40ZB ($40\times 10^{21}$bytes) by year 2020, 50-fold from 2010\footnotemark
+        \item generated from news media, social networks, medical records, 
+            business transactions\ldots
+        \item effective processing method is needed
+    \end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+    \center\includegraphics[width=\textwidth]{figure/data_growth_2020}
+    \end{column}
+    \end{columns}
+    \footnotetext[1]{Gantz, J., \& Reinsel, D. (2012). The digital universe in 2020: Big data, bigger digital shadows, and biggest growth in the far east. IDC iView: IDC Analyze the future, 2007(2012), 1-16.}
 \end{frame}
 
+\begin{frame}
+\frametitle{Sentence Classification}
+    Goal: assign pre-defined labels to a sentence, categorize topic.
+    $$f:\mathcal{D}\rightarrow\mathcal{L}$$
+    \begin{itemize}
+        \item $\mathcal{D}=\{d_0, d_1,\ldots, d_{n-1}\}$ is the set of sentence
+        \item $\mathcal{L}=\{l_0, l_1,\ldots, l_{k-1}\}$ is the set of labels.
+    \end{itemize}
+    The performance can be measured by $F_1$ Score:
+    $$F_1=\frac{2}{\frac{1}{r}+\frac{1}{p}}=\frac{2pr}{p+r}$$
+    \begin{itemize}
+        \item Precision: $p=\frac{tpr}{tpr+fpr}$
+        \item Recall: $r=\frac{tpr}{tpr+fnr}$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Sentence Classification by CNN}
+        \begin{columns}
+    \begin{column}{0.5\textwidth}
+    \center\includegraphics[width=\textwidth]{figure/sc_cnn}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+    \begin{itemize}
+        \item Historically via naive Bayes, nearest neighbor, decision trees, SVM, etc.
+        \item We propose to implement a sentence classifier based on CNN
+        \item CNN originally designed for computer vision
+        \item Shown significant potential in NLP
+    \end{itemize}
+    \end{column}
+    \end{columns}
+    \footnotetext{Plot credit: http://www.wildml.com/2015/11/understanding-convolutional-neural-networks-for-nlp/}
+\end{frame}
+
+\begin{frame}
+\center{\huge Thank You!}
+\center Questions?
+\end{frame}
 \end{document}
