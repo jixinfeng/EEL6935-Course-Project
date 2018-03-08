@@ -1,5 +1,6 @@
 \documentclass[conference]{IEEEtran}
 \usepackage{amssymb}
+\usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage[draft]{hyperref}
 \hyphenation{op-tical net-works semi-conduc-tor}
@@ -205,17 +206,45 @@
     Beside this, we also plan to build a web-based interface for the simulation, aiming
     to increase the user-friendliness of the whole project. The detail of the stretched
     goal is still yet to be fixed, and it will be will be included in the final project
-    report once finished.
-
+    report once finished. 
 
 \subsubsection{Long Short-Term Memory (LSTM)}
 \label{model:stretch:lstm}
     LSTM was originally proposed by Sepp Hochreiter and J\"urgen Schmidhuber back in 
     1997\cite{hochreiter1997long}, and usually serves as a building block of larger
-    recurrent neural network (RNN) layers.
+    recurrent neural network (RNN) layers. The basic object of LSTM is to fine-tune
+    the memory length of the input and system state over an arbitrary period of time
+    hence preventing premature ``memory loss'' and gradient vanishing of RNN.
+    
+    Given a word sequence $S=\{w_0,w_1,\ldots,w_{l-1}\}$ with length $l$, the states
+    of LSTM are updated as:
+    $$
+    \begin{bmatrix} 
+    i_t\\f_t\\o_t\\c_t 
+    \end{bmatrix} = 
+    \begin{bmatrix}
+    \sigma\\\sigma\\\sigma\\\tanh
+    \end{bmatrix}
+    S[h_{t-1},x_t]
+    $$
+    , in which $c_t=f_t\circ c_{t-1} + i_t\circ\hat{c_t}$ and $h_t=o_t\circ\tanh{c_t}$.
+    At time $t$ in this relationship, $c_t$ and $h_t$ are the LSTM memory and 
+    hidden state, $\hat{c_t}$ is the current cell state. The input at time $t$ 
+    is $x_t$ and the input/forget/output gate activation are represented by $i$, 
+    $f$ and $o$ respectively. $\sigma$ and $\circ$ are notations of logistic 
+    sigmoid function and element-wise multiplication\cite{zhou2016text}.
+    
+    Depending on the requirement on system causality, the LSTM can be applied on
+    both directions of time, which becomes Bidirectional LSTM 
+    (BLSTM)\cite{schuster1997bidirectional,barnes2017assessing}.
 
 \subsubsection{Web Interface}
 \label{model:stretch:web}
+    To improve the user-friendliness of this project, we also plan to create a 
+    web-based user interface for the program. With a webpage, selecting
+    the model for sentiment analysis can be done in a mouse click instead of 
+    enter a series of command line parameters, the output can also
+    be read from web browser, not a standard output stream in terminal. 
 
 \section{Proposed Simulation Scenarios}
 \label{scenarios}
