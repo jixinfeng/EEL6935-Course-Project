@@ -56,7 +56,7 @@
     Although this text data is a valuable source of information
     and can be easily comprehended by humans, current computational methods
     continue to struggle extracting information from unstructured text 
-    sources\cite{mitchell2015}.
+    sources.
     Hence effective methods to process and analyze unstructured text data are
     desperately needed.
 
@@ -98,15 +98,36 @@
     may end up with uncertain progress, but we will still try to finish them 
     with our best effort.
     
-    The report is organized as follows: system model, project core
-    and stretched goals are introduced and compared 
-    in \autoref{model}, simulation scenarios are then explained in 
-    \autoref{scenarios}, the conclusion of this 
-    project report and stretched goals are listed in \autoref{conclusions}
-
-\section{Proposed System Model}
+    The report is organized as follows: 
+    A brief introduction of related research contribution is in \autoref{related}.
+    system architecture and different analysis approaches are introduced and compared 
+    in \autoref{model}.
+    The benchmarks used for evaluating the performance is explained in 
+    \autoref{performance}
+    simulation scenarios are listed in \autoref{scenarios}.
+    The current progress and future plan of the whole project, and team management
+    is reported in \autoref{manage}
+    
+\section{Related Work}
+\label{related}
+    When processing natural languages, conventional methods usually treat text as 
+    a stream of bytes or words, and don't put much consideration into the relations
+    between them. This create simplicity but failed at digging the meaning of
+    language. Vectorize words in texts has been proof successful for numerous NLP
+    tasks. Researchers in Google spend a lot of efforts on this topic and 
+    made quite noticeable contributions\cite{mikolov2013efficient, word2vec}.
+    
+    Sentiment analysis has been actively studied for a long time. At the very beginning
+    of research, the analysis usually focused on analyze the sentiment of entire
+    sentense/document\cite{sack1994computation}. The application of
+    text vectorization and conventional machine learning techniques had great
+    success in 2000s\cite{pang2002thumbs}. With the help of significantly improved
+    computation power of CPU and GPU, the neural network related techniques 
+    started to show great potential in sentiment analysis 
+    domain\cite{kim2014convolutional,barnes2017assessing}.
+    
+\section{System Architecture}
 \label{model}
-
 \subsection{Project Core}
 \label{model:core}
     In this course project, we want to implement a convolutional neural network
@@ -246,6 +267,10 @@
     enter a series of command line parameters, the output can also
     be read from web browser, not a standard output stream in terminal. 
 
+\section{Performance Evaluation}
+\label{performance}
+
+
 \section{Proposed Simulation Scenarios}
 \label{scenarios}
     To test and evaluate our model, we propose using the Stanford Large Movie Review
@@ -269,8 +294,9 @@
     CPU with 8MB cache, 16GB RAM and nVidia GTX 1050 GPU with 4GB memory 
     running Ubuntu 14.04 LTS.
 
-\section{Conclusion}
-\label{conclusions}
+\section{Current Progress and Project Management}
+\label{manage}
+
     In this proposal we presented a convolutional neural network based on 
     Kim's paper for sentiment analysis on a number of data sets. We have 
     also proposed a test plan to evaluate the performance of our deep 
