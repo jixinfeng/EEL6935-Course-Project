@@ -2,6 +2,7 @@
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{graphicx}
+\usepackage{wasysym}
 \usepackage[draft]{hyperref}
 \hyphenation{op-tical net-works semi-conduc-tor}
 
@@ -333,10 +334,51 @@
 \section{Current Progress and Project Management}
 \label{manage}
 
-    In this proposal we presented a convolutional neural network based on 
-    Kim's paper for sentiment analysis on a number of data sets. We have 
-    also proposed a test plan to evaluate the performance of our deep 
-    learning architecture.
+\subsection{Current Status \& Team Coordination}
+\label{manage:status}
+    The course project has been overall well maintained and tracked. 
+    The whole project including documents and source code are stored
+    in a git repository hosted on GitHub 
+    (\url{https://github.com/ufjfeng/EEL6935-Course-Project}),
+    hence the contribution of each team member had been tracked.
+    
+    The current project status is:
+    \begin{description}
+        \item[\CheckedBox] Choose topic
+        \item[\CheckedBox] Write proposal
+        \item[\CheckedBox] Gather dataset
+        \item[\CheckedBox] Build baseline model with Logistic Regression
+        \item[\CheckedBox] Write mid-term report 
+        \item[$\Box$] Build CNN model
+        \item[$\Box$] (stretch) Build LSTM model
+        \item[$\Box$] (stretch) Build web interface
+        \item[$\Box$] Write project documentation
+        \item[$\Box$] Write final report
+    \end{description}
+
+\subsection{Weekly Plans and Deliverables}
+\label{manage:plan}
+
+    \begin{center}
+        \begin{tabular}{| l | p{7cm} |}
+        \hline
+        Week & Plan \\ \hline
+        1-3 & Read paper and select project topic \\ \hline
+        4 & Write project proposal and make slides \\ \hline
+        6-8 & Build project baseline model and finalize design \\ \hline
+        9 & Write midterm project report and make slides \\ \hline
+        10-13 & Build CNN model and worked on stretched goals \\ \hline
+        14-15 & Finalize course project, collect data and write final report \\ \hline
+        \end{tabular}
+    \end{center}
+
+    By the end of this semester, we will dilever:
+    \begin{itemize}
+    \item A working program for sentiment analysis and related documents
+    \item Final report of the project
+    \item Slides for in-class presentation
+    \item GitHub repository
+    \end{itemize}
 
 \bibliographystyle{IEEEtran}
 \bibliography{eel6935_mid_report.bib}
