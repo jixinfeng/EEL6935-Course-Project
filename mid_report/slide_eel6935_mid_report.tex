@@ -31,6 +31,9 @@
 
 \usepackage{color}
 \usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{wasysym}
 
 \usepackage[lined]{algorithm2e}
 
@@ -45,9 +48,9 @@
   {\color[RGB]{241,243,186}
 {\huge EEL6935 Course Project Proposal\\
     \vspace*{0.5em}
-    Sentence Classification Using a CNN}\\
+    Sentiment Analysis}\\
   \vspace*{1.8in}
-    Caleb Bryent, {\bf Jixin Feng}, Hao Huang \\
+    Caleb Bryent \& Jixin Feng \\
     \vspace*{1em}
   \begin{tabular}{cc}
   University of Florida
@@ -77,12 +80,18 @@
 \end{frame}
 
 \begin{frame}
-\frametitle{Sentence Classification}
-    Goal: assign pre-defined labels to a sentence, categorize topic.
+\frametitle{Sentiment Analysis}
+    Goal: assign pre-defined labels to a sentence, categorize opinion.
     $$f:\mathcal{D}\rightarrow\mathcal{L}$$
     \begin{itemize}
         \item $\mathcal{D}=\{d_0, d_1,\ldots, d_{n-1}\}$ is the set of sentence
         \item $\mathcal{L}=\{l_0, l_1,\ldots, l_{k-1}\}$ is the set of labels.
+    \end{itemize}
+    In the domain of sentiment analysis, $\mathcal{L}$ can be binary:
+    \begin{itemize}
+    \item Like/Dislike
+    \item Agree/Disagree
+    \item etc.
     \end{itemize}
 \end{frame}
 
@@ -105,17 +114,17 @@
 \end{frame}
 
 \begin{frame}
-\frametitle{Sentence Classification by CNN}
-        \begin{columns}
+\frametitle{Compare performance}
+    \begin{columns}
     \begin{column}{0.5\textwidth}
     \center\includegraphics[width=\textwidth]{figure/sc_cnn}
     \end{column}
     \begin{column}{0.5\textwidth}
     \begin{itemize}
         \item Historically via naive Bayes, nearest neighbor, decision trees, SVM, etc.
-        \item Propose to implement a sentence classifier based on CNN
-        \item CNN originally designed for computer vision
-        \item Shown significant potential in NLP
+        \item Build baseline model with Logistic Regression
+        \item Implement CNN model and compare performance
+        \item If time allows, compare with LSTM model too
     \end{itemize}
     \end{column}
     \end{columns}
@@ -123,7 +132,34 @@
 \end{frame}
 
 \begin{frame}
-\frametitle{System Model: Sentence}
+\frametitle{Baseline Model: Logistic Regression}
+    Represent text using Vector Space Model/Bag-of-Words Model
+    \begin{itemize}
+        \item Define word set $$\mathcal{W}=\{w_0, w_1,\ldots, w_{m-1}\}$$
+        \item Let $n_j(d_i)$ be a metric of word $w_j$ in sentence $d_i$
+        \item Each sentence can be vectorized
+        $$\bar{d_i}=(n_0(d_i),n_1(d_i),\ldots,n_{m-1}(d_i))$$
+        \item $n_j(d_i)$ can be either occurrence or frequency
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Baseline Model: Logistic Regression}
+    \begin{itemize}
+    \item $\hat{y} = \sigma(S(x^T_i W +b))$
+    \item $S(x) = \frac{1}{1+e^{-x}}$
+    \item $W$ is a $N \times C$ weight matrix, 
+    $N$ is number of words, $C$ is number of class
+    \item $\sigma (x)_{j}={\frac {e^{x_{j}}}{\sum _{i=1}^{N}e^{x_{i}}}}$
+    \item $b$ is a $C \times 1$ bias
+    \item pick $i=argmax(\hat{y}_i)$
+    \end{itemize}
+    train the model using
+    Stochastic Gradient Descent
+\end{frame}
+
+\begin{frame}
+\frametitle{CNN Model: Sentence}
     We model a sentence as:
     $$x_{1:n} = x_1 \oplus x_2 \oplus ... \oplus x_n$$
     \begin{itemize}
@@ -134,7 +170,7 @@
 \end{frame}
 
 \begin{frame}
-\frametitle{System Model: Convolution}
+\frametitle{CNN Model: Convolution}
     Convolution operator is defined as:
     $$c_i = f(W \cdot x_{i:i_{h-1}} + b)$$
     \begin{itemize}
@@ -150,7 +186,7 @@
 \end{frame}
 
 \begin{frame}
-\frametitle{System Model: Output}
+\frametitle{CNN Model: Output}
     Dropout on the penultimate layer 
     $$z = [\hat{c}_1,...,\hat{c}_m], \hat{c}=\operatorname{max}\{c\}$$
     The final output is:
@@ -162,7 +198,20 @@
 \end{frame}
 
 \begin{frame}
-\frametitle{Simulation Proposal}
+\frametitle{LSTM Model}
+    $$
+    \begin{bmatrix} 
+    i_t\\f_t\\o_t\\c_t 
+    \end{bmatrix} = 
+    \begin{bmatrix}
+    \sigma\\\sigma\\\sigma\\\tanh
+    \end{bmatrix}
+    S[h_{t-1},x_t]
+    $$
+\end{frame}
+
+\begin{frame}
+\frametitle{Simulation Platform Specs}
     \begin{itemize}
         \item Propose using the Stanford Large Movie Review Dataset
         \begin{itemize}
@@ -174,10 +223,43 @@
         \item simulations will be conducted on computers with 
         \begin{itemize}
             \item 3.1GHz Intel Core i7 CPU with 8MB cache
+            \item nVidia GTX 1050 GPU with 4GB Memory
             \item 16GB RAM
             \item Ubuntu 14.04 LTS
         \end{itemize}
     \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Project Progress}
+    \begin{description}
+        \item[\CheckedBox] Choose topic
+        \item[\CheckedBox] Write proposal
+        \item[\CheckedBox] Gather dataset
+        \item[\CheckedBox] Build baseline model with Logistic Regression
+        \item[\CheckedBox] Write mid-term report 
+        \item[$\Box$] Build CNN model
+        \item[$\Box$] (stretch) Build LSTM model
+        \item[$\Box$] (stretch) Build web interface
+        \item[$\Box$] Write project documentation
+        \item[$\Box$] Write final report
+    \end{description}
+\end{frame}
+
+\begin{frame}
+\frametitle{Weekly Plan}
+\begin{center}
+    \begin{tabular}{| l | p{7cm} |}
+        \hline
+        Week & Plan \\ \hline
+        1-3 & Read paper and select project topic \\ \hline
+        4 & Write project proposal and make slides \\ \hline
+        6-8 & Build project baseline model and finalize design \\ \hline
+        9 & Write midterm project report and make slides \\ \hline
+        10-13 & Build CNN model and work on stretched goals \\ \hline
+        14-15 & Finalize course project, collect data and write final report \\ \hline
+        \end{tabular}
+    \end{center}
 \end{frame}
 
 \begin{frame}

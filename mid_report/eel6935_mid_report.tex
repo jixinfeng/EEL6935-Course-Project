@@ -171,10 +171,9 @@
     variable indicating whether or not word $w_j$ occurs in sentence $d_i$:
      
     $$n_j(d_i) = \begin{cases} 
-    				0 & w_j \in d_i\\
-      				1 & w_j \notin d_i
-   		 	 \end{cases}
-			$$
+        0 & w_j \in d_i\\
+        1 & w_j \notin d_i
+    \end{cases}$$
     
     To establish a baseline for our later work with Deep Neural Networks (DNN), we have
     created a implemented a basic logistic regression model using tensorflow. Given a 
@@ -183,9 +182,9 @@
     possible classes, $W$ is a $N \times C$ weight matrix, and $b$ is a $C \times 1$ bias,
     our prediction $\hat{y}$ is defined as follows:
         
-    $$S(x) = \frac{1}{1+e^{-x}}$$
-    $$ \sigma (x)_{j}={\frac {e^{x_{j}}}{\sum _{i=1}^{N}e^{x_{i}}}}$$
     $$\hat{y} = \sigma(S(x^T_i W +b))$$
+    $$S(x) = \frac{1}{1+e^{-x}}$$
+    $$\sigma (x)_{j}={\frac {e^{x_{j}}}{\sum _{i=1}^{N}e^{x_{i}}}}$$
 
     
     Note that by construction $S(x)$ maps its input to a values between 0 and 1.
@@ -368,7 +367,7 @@
         4 & Write project proposal and make slides \\ \hline
         6-8 & Build project baseline model and finalize design \\ \hline
         9 & Write midterm project report and make slides \\ \hline
-        10-13 & Build CNN model and worked on stretched goals \\ \hline
+        10-13 & Build CNN model and work on stretched goals \\ \hline
         14-15 & Finalize course project, collect data and write final report \\ \hline
         \end{tabular}
     \end{center}
