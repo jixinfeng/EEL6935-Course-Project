@@ -3,6 +3,8 @@
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{wasysym}
+\usepackage{siunitx}
+\usepackage{tabularx, booktabs}
 \usepackage[draft]{hyperref}
 \hyphenation{op-tical net-works semi-conduc-tor}
 
@@ -182,20 +184,18 @@
     possible classes, $W$ is a $N \times C$ weight matrix, and $b$ is a $C \times 1$ bias,
     our prediction $\hat{y}$ is defined as follows:
         
-    $$\hat{y} = \sigma(S(x^T_i W +b))$$
-    $$S(x) = \frac{1}{1+e^{-x}}$$
+    $$\hat{y} = \sigma(x^T_i W +b)$$
     $$\sigma (x)_{j}={\frac {e^{x_{j}}}{\sum _{i=1}^{N}e^{x_{i}}}}$$
-
     
-    Note that by construction $S(x)$ maps its input to a values between 0 and 1.
-    Afterwards, we apply a softmax transformation to normalize the probabilities outputted
-    by $S(x)$ for multi-class prediction. Each entry $\hat{y}_i$ corresponds to the predicted
-    probability of $x_i$ belonging to class $i$.
+    Note that the softmax function maps each dimension of its input to a value between 0 and 1, and the
+    transformation also normalizes the predicted probabilities such that they sum to 1
+    for multi-class prediction. Each entry $\hat{y}_i$ corresponds to the predicted
+    probability of the input sentence $x$ belonging to class $i$.
     
-    We take the entry with maximum probability as the classifier's prediction and train the model using
-    Stochastic Gradient Descent and tensorflow's automatic differentiation. Since this model is both
-    commonly used and simple to implement, it forms a good baseline for our future work. Our results
-    for this model are reported later on in the document.
+        \includegraphics[width=0.45\textwidth]{figure/model_architecture}
+    
+    Since this model is both commonly used and simple to implement, it forms a good baseline
+    for our future work. Our results for this model are reported later on in the document.
 
 \subsubsection{Convolutional Neural Network}
 \label{model:core:cnn}
@@ -257,7 +257,7 @@
     vectors by rescaling $w$ to have $||w||_2 = s$ whenever $||w||_2 > s$ after a gradient
     decent step.
 
-\subsection{Stretched Goals}
+\subsection{Stretch Goals}
 \label{model:stretch}
     
     Beside this, we also plan to build a web-based interface for the simulation, aiming
@@ -305,15 +305,67 @@
 
 \section{Performance Evaluation}
 \label{performance}
-
-
-\section{Proposed Simulation Scenarios}
-\label{scenarios}
-    To test and evaluate our model, we propose using the Stanford Large Movie Review
-    Dataset to preform sentiment classification\cite{maas2011learning}.
-    The dataset contains 50,000 highly polar
-    movie reviews, and we will score each movie review as either positive or
-    negative. We will use a 60/20/20 split for training, development, and testing.
+    \begin{table*}[tp]
+        \centering
+        \caption{Initial Results from BoW Models}
+        \label{my-label}
+        \begin{tabularx}{\textwidth}{ X  X  X X  X }
+        \toprule
+        Method            & Binomial Training & Binomial Testing & Multinomial Training & Multinomial Testing \\
+        \midrule
+        scikit-learn LR   & 0.9981            & \textbf{0.8697}  & N/A                  & N/A                 \\
+        tensorflow LR & 0.8670            & 0.8583           & 0.9982               & \textbf{0.3734}     \\              
+        \bottomrule
+        \end{tabularx}
+    \end{table*}
+\subsection{Experiment Setup}
+    In order to evaluate our baseline sentiment analysis model, we use the
+    Stanford Large Movie Review data set \cite{maas2011learning}. This data
+    set consists of 50,000 movie reviews and corresponding scores from IMDb.
+    25,000 reviews are designated for training, and 25,000 reviews are designated for testing.
+    There are a total of 89526 unique words used in the interviews, and each
+    movie rating is an integer between 1 and 10. Using this dataset, we preform
+    two different machine learning tasks. First, we predict whether a movie review
+    has a mostly positive or mostly negative attitude towards the movie of interest. 
+    Second, we predict the score of unlabeled movie reviews from 1-10. We treat
+    both cases as instances of the multiclass classification problem.
+    
+    The whole project was coded with python 3, and our evaluation was conducted on
+    a Ubuntu 14.04 LTS machine with a 3.1GHz Intel Core i7 CPU with 8MB cache,
+    6GB RAM, and a 4GB nVidia GTX 1050 GPU.
+    
+\subsection{Performance Metrics}
+    To measure the performance of our systems, we calculate the raw accuracy
+    scores of the systems. We divide the number of correct class predictions
+    by the total number of predictions made. Accuracies were calculated
+    for both the training and testing sets of the Stanford Large Movie Review dataset.
+    
+\subsection{Experiment Results}
+    Here we provide initial results for our baseline bag of words model using
+    two different machine learning toolkits. The first set of results come from
+    using the python scikit-learn package's built in logistic regression model.
+    This model relies on highly optimized logistic regression algorithms
+    contained in the liblinear \cite{Fan:2008:LLL:1390681.1442794} package,
+    and it quickly converged to the global minimum. Since logistic regression
+    can be treated as convex optimization problem, we do not have to worry 
+    about escaping local optima. We also evaluated the logistic regression
+    model using a custom tensorflow implementation. The results reported
+    above were achieved training our model with a 20 shuffled epochs, a
+    batch size of 50, a learning rate of \num{1e-4}, and the Adam optimizer.
+    In the binomial case, our model is given training data where samples are
+    labeled only as positive (the rating is $\leq 5$) or negative (the rating is
+    $\geq 6$), and the ground truth score is hidden. We found that this slightly
+    increased our accuracy compared to predicting scores from 1-10 and
+    bucketing the scores afterwards. In the multinomial case, our model is
+    shown the complete rating and predicts scores from 1-10.
+    
+    While the scikit-learn package included a highly optimized algorithm for
+    preforming binomial linear regression, none of the included solvers were
+    capable of handling the multinomial linear regression problem due to intensive
+    memory usage. Thus we have only provided results from our tensorflow
+    model in the multinomial case.
+    
+\subsection{Future Work}
 
     In addition to using the above data set, we will also train and test using the 
     Stanford Sentiment Treebank, which is one of the data sets Kim evaluated in 
@@ -323,14 +375,7 @@
     classification tasks will be performed and scored for accuracy.
     For all tasks, we will compute the accuracy of our model by diving the 
     number of correct classifications by the total number of test samples.
-
-    The whole project is coded with python 3 and the baseline model
-    is build with Scikit-Learn\cite{scikit-learn} and the CNN model
-    will be built with Tensorflow\cite{tensorflow2015-whitepaper}. The 
-    simulations are conducted on computers with a 3.1GHz Intel Core i7 
-    CPU with 8MB cache, 16GB RAM and nVidia GTX 1050 GPU with 4GB memory 
-    running Ubuntu 14.04 LTS.
-
+    
 \section{Current Progress and Project Management}
 \label{manage}
 
