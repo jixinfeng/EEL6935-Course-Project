@@ -34,6 +34,7 @@
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{wasysym}
+\usepackage{tabularx, booktabs}
 
 \usepackage[lined]{algorithm2e}
 
@@ -139,23 +140,46 @@
         \item Let $n_j(d_i)$ be a metric of word $w_j$ in sentence $d_i$
         \item Each sentence can be vectorized
         $$\bar{d_i}=(n_0(d_i),n_1(d_i),\ldots,n_{m-1}(d_i))$$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{}
+    \begin{itemize}
         \item $n_j(d_i)$ can be either occurrence or frequency
+        \item With frequency representations:
+        $$n_j(d_i) = \frac{\text{\# of }w_j \text{in } d_i}{\text{\# of words in } d_i}$$
+        \item With feature presence representations
+        $$n_j(d_i) = \begin{cases} 
+        0 & w_j \in d_i\\
+        1 & w_j \notin d_i
+        \end{cases}$$
     \end{itemize}
 \end{frame}
 
 \begin{frame}
 \frametitle{Baseline Model: Logistic Regression}
     \begin{itemize}
-    \item $\hat{y} = \sigma(S(x^T_i W +b))$
-    \item $S(x) = \frac{1}{1+e^{-x}}$
-    \item $W$ is a $N \times C$ weight matrix, 
-    $N$ is number of words, $C$ is number of class
-    \item $\sigma (x)_{j}={\frac {e^{x_{j}}}{\sum _{i=1}^{N}e^{x_{i}}}}$
-    \item $b$ is a $C \times 1$ bias
-    \item pick $i=argmax(\hat{y}_i)$
+        \item $\hat{y} = \sigma(S(x^T_i W +b))$
+        \item $S(x) = \frac{1}{1+e^{-x}}$
+        \item $W$ is a $N \times C$ weight matrix
+        \item $N$ is number of words, $C$ is number of class
+        \item $\sigma (x)_{j}={\frac {e^{x_{j}}}{\sum _{i=1}^{N}e^{x_{i}}}}$
+        \item $b$ is a $C \times 1$ bias
     \end{itemize}
-    train the model using
-    Stochastic Gradient Descent
+\end{frame}
+
+\begin{frame}
+\frametitle{}
+    \center\includegraphics[width=0.9\textwidth]{figure/model_architecture}
+    \begin{itemize}
+        \item Maps each dimension of its input to $[0, 1]$
+        \item Transformation normalizes the predicted probabilities
+        \item pick $i=argmax(\hat{y}_i)$
+        \item Train the model using Stochastic Gradient Descent
+        \item Commonly used and simple to implement
+        \item Forms a good baseline
+    \end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -198,16 +222,35 @@
 \end{frame}
 
 \begin{frame}
-\frametitle{LSTM Model}
-    $$
-    \begin{bmatrix} 
-    i_t\\f_t\\o_t\\c_t 
-    \end{bmatrix} = 
-    \begin{bmatrix}
-    \sigma\\\sigma\\\sigma\\\tanh
-    \end{bmatrix}
-    S[h_{t-1},x_t]
-    $$
+\frametitle{Stretch Goals}
+    Beside the system architecture introduced previously, we also have a
+    list of stretch goals.
+    \begin{itemize}
+        \item LSTM Model
+        \item Web-based user interface
+        \item Progress subject to limitation of man power
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Stretch Goals: LSTM Model}
+    \begin{itemize}
+        \item Originally proposed in 1997
+        \item Usually serves as a building block of larger RNN layers
+        \item Build to prevent premature ``memory loss'' and gradient vanishing
+        \item LSTM can be applied on both directions of time, which turns into
+        Bidirectional LSTM
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Stretch Goals: Web interface}
+    \begin{itemize}
+        \item Build a web interface based on Django or Flask
+        \item Allow model selection
+        \item Accept text input and sentiment analysis output
+        \item Hide the tedious CLI
+    \end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -219,7 +262,8 @@
         \end{itemize}
         \item Score each movie review as either positive or negative
         \item Use a 60/20/20 split for training, development, and testing
-        \item Code in Python with Tensorflow
+        \item Code in Python with Tensorflow/Scikit-Learn
+        \item Document composed in \LaTeX
         \item simulations will be conducted on computers with 
         \begin{itemize}
             \item 3.1GHz Intel Core i7 CPU with 8MB cache
@@ -228,6 +272,23 @@
             \item Ubuntu 14.04 LTS
         \end{itemize}
     \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Initial Results from BoW Models}
+    \begin{table}[tp]
+    \centering
+    \caption{Initial Results from BoW Models}
+    \begin{tabularx}{\textwidth}{ X  X  X X  X }
+    \toprule
+        Method & Binomial Training & Binomial Testing & Multinomial Training & Multinomial Testing \\
+        \midrule
+        scikit-learn & 0.9981 & \textbf{0.8697} & N/A & N/A \\
+        tensorflow & 0.8670 & 0.8583 & 0.9982 & \textbf{0.3734} \\
+        \bottomrule
+    \end{tabularx}
+    \end{table}
+
 \end{frame}
 
 \begin{frame}
@@ -263,7 +324,13 @@
 \end{frame}
 
 \begin{frame}
-\center{\huge Thank You!}
-\center Questions?
+    \center{\huge Thank You!}
+    \center{Questions?}\\
+    \vfill
+    Project code/report/document are hosted on GitHub repository\\
+    \vspace{1em}
+    \url{https://github.com/ufjfeng/EEL6935-Course-Project} \\or\\
+    \url{https://tinyurl.com/eel6935-t21}
+
 \end{frame}
 \end{document}
