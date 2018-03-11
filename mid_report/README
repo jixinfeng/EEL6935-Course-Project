@@ -1,0 +1,20 @@
+=== Obtaining the Dataset ===
+The Stanford Large Movie Review Dataset v1.0 can be downloaded at http://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz. Once downloaded, set the global varibles TRAINING_BOW and TESTING_BOW in train.py and eval.py to the 'train' and 'test' folders of the dataset. 
+
+For example:
+   TRAINING_BOW = 'path/to/aclImdb/train/labeledBow.feat'
+   TESTING_BOW = 'path/to/aclImdb/train/labeledBow.feat'
+
+
+=== Training the Tensorflow Model ===
+To train the model, run "python train.py" By default, the model will train train for 20 epochs and save its parameters to '/tmp/model.ckpt'.You can view its training loss over time by running "tensorboard --logdir=logs/train"
+
+
+=== Evaluating the Tensorflow Model
+Run "python eval.py" to view the model's results on both the training and testing datasets.
+
+
+=== Comparing with scikit-learn ===
+Run "python scikit.py" to view logistic regression accuracies on both testing and training datasets using a scikit-learn logistic regression model.
+
+
