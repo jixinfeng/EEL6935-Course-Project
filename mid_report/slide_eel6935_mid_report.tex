@@ -51,7 +51,7 @@
     \vspace*{0.5em}
     Sentiment Analysis}\\
   \vspace*{1.8in}
-    Caleb Bryent \& Jixin Feng \\
+    Caleb Bryant \& Jixin Feng \\
     \vspace*{1em}
   \begin{tabular}{cc}
   University of Florida
@@ -88,11 +88,11 @@
         \item $\mathcal{D}=\{d_0, d_1,\ldots, d_{n-1}\}$ is the set of sentence
         \item $\mathcal{L}=\{l_0, l_1,\ldots, l_{k-1}\}$ is the set of labels.
     \end{itemize}
-    In the domain of sentiment analysis, $\mathcal{L}$ can be binary:
+    Evaluate using the Stanford Large Movie Review Dataset
     \begin{itemize}
-    \item Like/Dislike
-    \item Agree/Disagree
-    \item etc.
+        \item 50,000 highly polar movie reviews
+        \item Each review scored from 1-10
+        \item Conduct both binary and multiclass classification
     \end{itemize}
 \end{frame}
 
@@ -115,7 +115,7 @@
 \end{frame}
 
 \begin{frame}
-\frametitle{Compare performance}
+\frametitle{Analysis Tools}
     \begin{columns}
     \begin{column}{0.5\textwidth}
     \center\includegraphics[width=\textwidth]{figure/sc_cnn}
@@ -173,12 +173,11 @@
 \frametitle{}
     \center\includegraphics[width=0.9\textwidth]{figure/model_architecture}
     \begin{itemize}
-        \item Maps each dimension of its input to $[0, 1]$
-        \item Transformation normalizes the predicted probabilities
+        \item Multiply input vectors by $W$, add $b$
+        \item Convert output into probabilities with Softmax
         \item pick $i=argmax(\hat{y}_i)$
-        \item Train the model using Stochastic Gradient Descent
-        \item Commonly used and simple to implement
-        \item Forms a good baseline
+        \item Train the model using Adam Optimizer
+        \item Common baseline model and simple to implement
     \end{itemize}
 \end{frame}
 
