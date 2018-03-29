@@ -184,7 +184,7 @@ Department of \\
     \begin{itemize}
         \item Question only contain single argument
     \end{itemize}
-    \item Relation extraction (RE) usually works on small, pre-defined relation set
+    \item Usually works on small, pre-defined relation set
     \end{itemize}
 \end{frame}
 
@@ -373,9 +373,18 @@ Department of \\
 \end{frame}
 
 \begin{frame}
-\frametitle{Experiment: KBQA End-Task}
+\frametitle{Conclusions}
+    \begin{itemize}
+        \item Proposed a novel KB relation detection Model, HR-BiLSTM, that performs hierarchical matching between questions and KB relations
+        \item Proposed model outperforms the previous methods on KB relation detection
+        \item Proposed proof-of-concept KBQA system achieved state-of-the-arts in both single relation and multiple relation tasks
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Conclusions}
     \begin{columns}
-    \begin{column}{0.5\textwidth}
+    \begin{column}[t]{0.5\textwidth}
     {\bf Strong Points:}
     \begin{itemize}
         \item Combine different granularity in KB relationship
@@ -384,7 +393,7 @@ Department of \\
         \item Hierarchical architecture to learn different level of abstraction to prevent over-fitting
     \end{itemize}
     \end{column}
-    \begin{column}{0.5\textwidth}
+    \begin{column}[t]{0.5\textwidth}
     {\bf Weak Points:}
     \begin{itemize}
         \item Exact analyze of training difficulty is missing
