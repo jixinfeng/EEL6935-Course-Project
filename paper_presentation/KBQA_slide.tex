@@ -82,10 +82,10 @@ Department of \\
 \frametitle{What is a Question Answering System?}
     \begin{columns}
     \begin{column}{0.5\textwidth}
-    \includegraphics[width=\textwidth]{figure/KB_BO}
+    \includegraphics[width=\textwidth]{figure/KB_BO}\\
     % Picture Credit:
     % https://www.semanticscholar.org/paper/Semantic-Parsing-on-Freebase-from-Question-Answer-Berant-Chou/042db0977555fcd7d5eac67b26695cd918ecb44c
-    Question answering (QA) is a computer systems that automatically answer questions posed by humans in a natural language. QA systems can pull answers from an unstructured collection of natural language documents.
+    Question answering (QA) is a computer systems that can automatically answer questions posed by humans in natural language. QA systems often convert their input into a structured form which can be used to query a KB.
     \end{column}
     \begin{column}{0.5\textwidth}
     \includegraphics[width=\textwidth]{figure/IBM-Watson-Logo}
@@ -100,7 +100,7 @@ Department of \\
     \begin{columns}
     \begin{column}{0.35\textwidth}
     \begin{itemize}
-    \item {\bf IBM Watson} is automated QA system
+    \item {\bf IBM Watson} is an automated QA system
     \item Defeated the two greatest Jeopardy! champions
     \item Won the match, outscoring both opponents combined
     \end{itemize}
@@ -117,7 +117,7 @@ Department of \\
     \begin{itemize}
     \item KBQA systems answer questions by obtaining information from KB tuples\\
     \item \texttt{input question} $\rightarrow$ \texttt{KB query} $\rightarrow$ \texttt{answer}
-    \item Questions can be single-relation question and multiple-relation question
+    \item Questions can be single-relation questions or multiple-relation questions
     \end{itemize}
 \end{frame}
 
@@ -129,22 +129,24 @@ Department of \\
 
 \begin{frame}
 \frametitle{Introduction}
-    This paper focus on improvement of relation detection.
+    This paper focuses on improving relation detection.
     \begin{itemize}
         \onslide<1->{
         \item General relation detection has been well studied in NLP
         \begin{itemize}
-            \item Not KBQA driven, causing significant gap
+            \item Most research typically not KBQA driven
+            \item Significant gap between previous work and current needs
         \end{itemize}
-        \item Number of target relations is limited in most general relation detection tasks
+        \item Number of target relations is limited in most research papers
         \begin{itemize}
-            \item Normally $\leq 100$ relations detected
-            \item Even a small KB may contains $\geq 6000$ relations
+            \item Often attempt detecting $\leq 100$ relations
+            \item Even a small KB may contain $\geq 6000$ relations
         \end{itemize}
         \item Multiple relation questions require a chain of prediction
         \item Relation detection in KBQA often becomes a {\bf zero-shot learning} task}
         \onslide<3->{
-        \item {\bf Conclusion:} KB relation detection is much harder}
+        \item {\bf Conclusion:} KB relation detection is much harder
+        }
     \end{itemize}
     \onslide<2>{
     \begin{tikzpicture}[remember picture,overlay]
@@ -166,41 +168,42 @@ Department of \\
 \begin{frame}
 \frametitle{Relation Extraction}
     \begin{itemize}
-    \item The goal is to determine whether 
-        \texttt{<entity-text\_paragraph-entity>} \\
-        can be classified as 
-        \texttt{<entity-relation-entity>}
+    \item A related problem from the Information Extraction community
+    \item \textbf{The problem:} given a natural language document and all entity occurrences inside it, find all of the relationships encoded within the document.
     \item RE usually formulated as classification task
     \begin{itemize}
+       \item  Classify all possible \texttt{<entity1, paragraph, entity2>} vectors
+       \item Relationships with high enough confidence are collected
         \item Traditional RE relies on large amount of hand-crafted features
-        \item Benefits from deep learning research: word embedding, CNN, LSTM, etc.
+        \item Impovements from deep learning research: word embeddings, CNN, LSTM, etc.
     \end{itemize}\pause
-    \item Assume fixed, closed set of relation types to avoided zero-shot learning
+    \item Traditionally assumes closed set of relation types to avoid zero-shot learning
     \begin{itemize}
-        \item Rarely go beyond $\geq 100$ features
-        \item Need to be trained in supervised way
+        \item Rarely goes beyond $\geq 100$ features
+        \item Needs to be trained in supervised way
     \end{itemize}
-    \item Assume two argument entities are both available
+    \item Assumes two argument entities are both available
     \begin{itemize}
-        \item Question only contain single argument
+        \item For QA, only single argument is available
     \end{itemize}
-    \item Relation extraction (RE) usually works on small, pre-defined relation set
+    \item Relation extraction (RE) usually works on small, pre-defined relation sets
     \end{itemize}
 \end{frame}
 
 \begin{frame}
 \frametitle{Relation Detection}
     \begin{itemize}
-        \item RD Naturally support large relation vocabulary and open relation sets
-        \item Fit the goal of open-domain question answering
+       \item The focus of this paper
+       \item \textbf{The problem:} given a question and a relationship type, output the probability of that relationship being encoded in the question
+        \item Large relation vocabulary/open relation sets needed to support RD task
+        \item Fits the goal of open-domain question answering
         \item Need to deal with zero-shot learning:
         \begin{itemize}
-            \item Use pre-trained relation embeddings
-            \item Factorize the relation names to sequences and use \\
+            \item Treat questions and potential relationships as sequences and use \\
             {\bf sequence matching and ranking}
         \end{itemize}
-        \item Matching and ranking works well because relation names usually forms meaningful word sequences\pause
-        \item This paper focus on improvement of RD
+        \item Matching and ranking works well because relation names usually form meaningful word sequences\pause
+        \item This paper focuses on improving RD
     \end{itemize}
 \end{frame}
 
@@ -208,24 +211,24 @@ Department of \\
 \frametitle{Different Granularity in KB Relations}
     \begin{itemize}
         \item {\bf Goal:} Formulate KB relation detection as sequence matching problem
-        \item Exist different types of relation representation
+        \item Different types of relationship representation
         \begin{itemize}
-            \item Relation Name as a Single Token ({\it relation-level})
-            \item Relation as Word Sequence ({\it word-level})
+            \item Relation as a Single Token - use KB embeddings! ({\it relation-level})
+            \item Relation as a Word Sequence - use word embeddings! ({\it word-level})
         \end{itemize}
     \end{itemize}
     \includegraphics[width=\textwidth]{figure/table1_big}
 \end{frame}
 
 \begin{frame}
-\frametitle{Relation Name as a Single Token}
+\frametitle{Relation as a Single Token}
     \begin{itemize}
         \item Each relation is treated as a unique token
-        \item This suffers from the low relation coverage dut to limited training data
-        \item In this example, matching \texttt{episodes\_written} and 
-            \texttt{starring\_roles} can be hard if these names do not appear 
-            in training data
-        \item Relation embedding will be random vector, not comparable to question embedding
+        \item This suffers from the low relation coverage due to limited training data
+        \item For example, matching \texttt{episodes\_written} and 
+            \texttt{starring\_roles} will be very hard if no examples appear 
+            in the training data
+        \item Relation embedding will be a random vector, not comparable to question embedding
     \end{itemize}
     \center\includegraphics[width=0.8\textwidth]{figure/fig1}
 \end{frame}
@@ -234,7 +237,7 @@ Department of \\
 \frametitle{Relation as Word Sequence}
     \begin{itemize}
         \item Relation is treated as a sequence of words from the tokenized relation name
-        \item Better generalization but suffers from lack of global information
+        \item Better generalization but has difficulty learning higher-level concepts
         \item Very hard to rank \texttt{starring\_roles} higher than 
             \texttt{plays\_produced}
         \begin{itemize}
@@ -253,37 +256,38 @@ Department of \\
     \end{column}
     \begin{column}{0.4\textwidth}
     \begin{itemize}
-        \item Word-level focuses more on local information but lack of global information
-        \item Relation-level focus more on global information but suffer from data sparsity
-        \item This paper propose a hierarchical matching approach that matches both information level
+        \item Word-level focuses more on local information but lacks of global information
+        \item Relation-level focuses more on global information but suffers from data sparsity
+        \item This paper propose a hierarchical matching approach that incorporates both information levels
     \end{itemize}
     \end{column}
     \end{columns}
 \end{frame}
 
 \begin{frame}
-\frametitle{Relation Representation from Different Granularity}
+\frametitle{Relation Representation from Different Granularities}
     \begin{itemize}
         \item Tokenize input relation as 
             $$\mathbf{r}=\{r_1^{word},r_2^{word},\ldots,r_{M_1}^{word}\}\cup
             \{r_1^{rel},r_2^{rel},\ldots,r_{M_2}^{rel}\}$$
         \item first $M_1$ tokens are words and last $M_2$ tokens are relation names
-        \item Transform each token to word embedding then to hidden representation
+        \item Transform each token to its word/relation embedding
+        \item Then find hidden representation for the relation sequence
             $$[\mathbf{B}_{1:M_1}^{word}:\mathbf{B}_{1:M_1}^{rel}]$$
             via two BiLSTMs
         \item Initialize relation sequence LSTMs with the final state representations of the word sequence
-        \item Apply one max-pooling on these two sets of vectors and get final relation representation $\mathbf{h}^r$
+        \item Apply max-pooling to these two sets of vectors and get the final relation representation $\mathbf{h}^r$
     \end{itemize}
 \end{frame}
 
 \begin{frame}
 \frametitle{Different Abstraction of Questions Representations}
     \begin{itemize}
-        \item Want question representation vectors summarize various 
-            length of phrase to match relation representations of different 
+        \item Question representation vectors should summarize various 
+            length phrases to match relation representations of different 
             granularity
         \item Achieved via applying deep BiLSTM on questions
-        \item First layer works on word embeddings, convert question words
+        \item First layer works on word embeddings, converts question words
             $\mathbf{q}=\{q_1,\ldots,q_N\}$
             to hidden representation 
             $\mathbf{\Gamma}_{1:N}^{(1)}=[\gamma_1^{(1)},\ldots,\gamma_N^{(1)}]$
@@ -291,7 +295,7 @@ Department of \\
             to $\mathbf{\Gamma}_{1:N}^{(2)}$
         \item $\mathbf{\Gamma}_{1:N}^{(1)}$ and $\mathbf{\Gamma}_{1:N}^{(2)}$ 
             could potentially match to either level of relation representation
-        \item Need additional methods to reduce difficulty
+        \item Need additional methods to reduce training difficulty
     \end{itemize}
 \end{frame}
 
@@ -300,14 +304,14 @@ Department of \\
     \begin{itemize}
         \item Two levels of question hidden representation are not 
             guaranteed to be comparable
-        \item Training deep BiLSTM is difficult
+        \item Training deep BiLSTM is difficult - use residual connections between layers
         \item This paper proposed two ways of Hierarchical Residual Matching
         \begin{itemize}
-            \item Connecting $\gamma_i^{(1)}$ and $\gamma_i^{(1)}$, resulting
-                $\gamma_i^\prime=\gamma_i^{(1)} + \gamma_i^{(2)}$, and final question
+            \item Connecting $\gamma_i^{(1)}$ and $\gamma_i^{(1)}$ gives
+                $\gamma_i^\prime=\gamma_i^{(1)} + \gamma_i^{(2)}$, and the final question
                 representation $\mathbf{h}^q$ becomes a max-pooling of all $\gamma_i^\prime$
-            \item Apply max-pooling on $\mathbf{\Gamma}_{1:N}^{(1)}$,
-                $\mathbf{\Gamma}_{1:N}^{(2)}$ and get 
+            \item Applying max-pooling to $\mathbf{\Gamma}_{1:N}^{(1)}$,
+                $\mathbf{\Gamma}_{1:N}^{(2)}$  we get 
                 $$\mathbf{h}^q=\mathbf{h}_{max}^{(1)}+\mathbf{h}_{max}^{(1)}$$
         \end{itemize}
         \item Matching score between relation and question is
@@ -343,7 +347,7 @@ Department of \\
     \onslide<1->{
     \begin{itemize}
         \item Dataset: SimpleQuestion (Bordes et al., 2015) and WebQSP (Yih et al., 2016)
-        \item Each question is labeled with the gold semantic parse
+        \item Each question is labeled with the ground-truth semantic parse
         \item Direct performance evaluation is possible, as well as KBQA evaluation
     \end{itemize}}
     \onslide<2>{
@@ -378,16 +382,16 @@ Department of \\
     \begin{column}{0.5\textwidth}
     {\bf Strong Points:}
     \begin{itemize}
-        \item Combine different granularity in KB relationship
-            to catch both local and global information
-        \item Using shortcut connections between BiLSTMs reduce training difficulty
-        \item Hierarchical architecture to learn different level of abstraction to prevent over-fitting
+        \item Combined different granularities of KB relationship tokens
+            to capture both local and global information
+        \item Used shortcut connections between BiLSTMs to reduce training difficulty
+        \item Hierarchical architecture learned different levels of abstraction to prevent over-fitting
     \end{itemize}
     \end{column}
     \begin{column}{0.5\textwidth}
     {\bf Weak Points:}
     \begin{itemize}
-        \item Exact analyze of training difficulty is missing
+        \item Exact analysis of training difficulty is missing
         \item Result of ablation test is not strong
         \item Overall performance improvement is marginal
     \end{itemize}
