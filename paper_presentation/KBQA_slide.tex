@@ -199,7 +199,7 @@ Department of \\
     \begin{itemize}
        \item The focus of this paper
        \item \textbf{The problem:} given a question and a relationship type, output the probability of that relationship being encoded in the question
-        \item Large relation vocabulary/open relation sets needed to support RD task
+        \item Naturally extends to large relation vocabulary/open relation sets
         \item Fits the goal of open-domain question answering
         \item Need to deal with zero-shot learning:
         \begin{itemize}
@@ -260,7 +260,7 @@ Department of \\
     \end{column}
     \begin{column}{0.4\textwidth}
     \begin{itemize}
-        \item Word-level focuses more on local information but lacks of global information
+        \item Word-level focuses more on local information but lacks global information
         \item Relation-level focuses more on global information but suffers from data sparsity
         \item This paper propose a hierarchical matching approach that incorporates both information levels
     \end{itemize}
@@ -316,7 +316,7 @@ Department of \\
                 representation $\mathbf{h}^q$ becomes a max-pooling of all $\gamma_i^\prime$
             \item Applying max-pooling to $\mathbf{\Gamma}_{1:N}^{(1)}$,
                 $\mathbf{\Gamma}_{1:N}^{(2)}$  we get 
-                $$\mathbf{h}^q=\mathbf{h}_{max}^{(1)}+\mathbf{h}_{max}^{(1)}$$
+                $$\mathbf{h}^q=\mathbf{h}_{max}^{(1)}+\mathbf{h}_{max}^{(2)}$$
         \end{itemize}
         \item Matching score between relation and question is
             $$s_{rel}(\mathbf{r};\mathbf{q})=\cos(\mathbf{h}^r,\mathbf{h}^q)$$
@@ -407,6 +407,8 @@ Department of \\
         \item Exact analysis of training difficulty is missing
         \item Result of ablation test is not strong
         \item Overall performance improvement is marginal
+        \item System architecture figure is misleading
+        \item Unclear description about relation embedding
     \end{itemize}
     \end{column}
     \end{columns}
