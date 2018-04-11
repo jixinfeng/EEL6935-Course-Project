@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>T21 | EEL6935 Course Project</title>
+    <link rel="stylesheet" href="https://gitcdn.link/repo/Chalarangelo/mini.css/master/dist/mini-nord.css" />
+</head>
+<body>
+    <header class="sticky">
+        <div class="col-sm col-md-10">
+            <h1>EEL6935 | Team 21</h1>
+        </div>
+    </header>
+    <br />
+    <div class="container">
+        <h3 class="title">Sentiment Analysis</h3>
+        <form action = "{{ url_for('result') }}" method = "POST">
+            <p>Movie Review:</p>
+            <p><textarea name="review" class="form-control" style="min-width: 100%">I love this movie!</textarea></p>
+            <div class="row">
+            <div class="col-sm-6 col-md-3 col-lg-2">
+            <p>Model:</p>
+            <p>
+                <select name="model" size="2">
+                    <option value="baseline" selected>Baseline</option>
+                    <option value="lstm">LSTM</option>
+                </select>
+            </p>
+            </div>
+            <div class="col-sm-6 col-md-3 col-lg-2">
+            <p>Granularity:</p>
+            <p>
+                <select name="granularity" size="2">
+                    <option value="binary" selected>Binary</option>
+                    <option value="multiclass">Multi-Class</option>
+                </select>
+            </p>
+            </div>
+            </div>
+            <p><input type = "submit" value = "submit" /></p>
+        </form>
+    </div>
+    <footer class="sticky">
+        <div class="col-sm col-md-10 col-lg">
+        <p>Design and implemented by Caleb Bryant and Jixin Feng</p>
+        <p>Built using <a href="https://chalarangelo.github.io/mini.css/">mini.css</a></p>
+        </div>
+    </footer>
+</body>
+</html>
