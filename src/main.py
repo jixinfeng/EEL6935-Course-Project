@@ -34,7 +34,7 @@ def main():
     print("Size of dataset:", dataset.size)
 
     if args.predict is not False:
-        model.predict()
+        model.predict([input()])
     elif args.test:
         model.score(dataset.input_fn, args)
     else:

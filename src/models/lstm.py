@@ -2,7 +2,8 @@ import tensorflow as tf
 import numpy as np
 import datetime
 import timeit
-
+from nltk import word_tokenize
+from collections import defaultdict
 
 # Built referencing https://github.com/aymericdamien/TensorFlow-Examples/blob/master/examples/2_BasicModels/logistic_regression.py
 # and https://web.stanford.edu/class/cs20si/2017/lectures/notes_03.pdf
@@ -14,6 +15,11 @@ def data_type():
 class LSTM:
     def __init__(self, args):
         self.args = args
+
+        if hasattr(self.args, 'word_dict'):
+            self.word_dict = defaultdict(int, self.args.word_dict)
+        else:
+            self.word_dict = defaultdict(int)
 
     def _get_lstm_cell(self):
         return tf.contrib.rnn.BasicLSTMCell(
@@ -132,7 +138,6 @@ class LSTM:
 
             embedding_dim_node = tf.placeholder(tf.float32, shape=())     
             embedding_dim_summary = tf.summary.scalar('embedding_dim_size', embedding_dim_node)
-
 
         # Start training
         with tf.Session() as sess:
@@ -294,5 +299,14 @@ class LSTM:
         print("Total cost:", total_cost)
         print(stop - start)
 
-    def predict(self):
-        raise NotImplemented
+    def predict(self, docs):
+        inputs = np.zeros(len(docs), self.args.max_timesteps)
+        for i, doc in enumerate(docs):
+            for j, word in enumerate(word_tokenize(doc)):
+                inputs[i][j] = self.word_dict[word]
+
+        with tf.Session() as sess:
+            label_classes = sess.run(self.label_class, feed_dict={self.inputs: inputs})
+
+        return label_classes
+
