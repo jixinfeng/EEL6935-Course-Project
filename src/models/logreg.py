@@ -1,14 +1,24 @@
 import tensorflow as tf
 import datetime
+import os
+import numpy as np
+from nltk import word_tokenize
 
 # Built referencing https://github.com/aymericdamien/TensorFlow-Examples/blob/master/examples/2_BasicModels/logistic_regression.py
 # and https://web.stanford.edu/class/cs20si/2017/lectures/notes_03.pdf
 
 class LogisticRegression:
-    def __init__(self, model_dir=None):
+    def __init__(self, args):
         self.width_in = None
         self.width_out = None
-        self.model_dir = model_dir
+        self.model_dir = args.model_dir
+
+        self.word_dict = {}
+        vocab_file = os.path.join(os.path.dirname(__file__), '../data/aclImdb/imdb.vocab')
+        with open(vocab_file) as f:
+            linenum = 0
+            for line in f.readlines():
+                self.word_dict[line[:-1]] = linenum
 
     def _get_widths(self, dataset):
         # Find out the input and output data dimensions
@@ -31,10 +41,10 @@ class LogisticRegression:
 
         with tf.name_scope('weights'):
             # Set model weights
-            self.W = tf.get_variable("W", shape=(self.width_in, self.width_out), initializer=tf.contrib.layers.xavier_initializer())
+            self.W = tf.get_variable("W", shape=(self.width_in, self.width_out))
 
         with tf.name_scope('biases'):
-            self.b = tf.get_variable("b", shape=self.width_out, initializer=tf.contrib.layers.xavier_initializer())
+            self.b = tf.get_variable("b", shape=self.width_out)
 
         with tf.name_scope('logits'):
             self.logits = tf.matmul(self.x, self.W) + self.b
@@ -50,7 +60,7 @@ class LogisticRegression:
             return loss
 
     # Train the model with the Dataset passed in
-    def train(self, input_fn, save_dir=None, num_epochs=25, learning_rate=0.0001, batch_size=20, display_period=100):
+    def train(self, input_fn, args):
         dataset = input_fn()
 
         # Get info on the dataset
@@ -61,7 +71,7 @@ class LogisticRegression:
 
         # Batch the data
         dataset = dataset.shuffle(buffer_size=25000)
-        dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(batch_size))
+        dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(args.batch_size))
 
         # Get an iterator to the dataset
         iterator = dataset.make_initializable_iterator()
@@ -69,7 +79,7 @@ class LogisticRegression:
 
         # Create an optimization variable
         with tf.name_scope('optimizer'):
-            train_step = tf.train.AdamOptimizer(learning_rate).minimize(loss)
+            train_step = tf.train.AdamOptimizer(args.lr).minimize(loss)
 
         # Initialize all of the model variables (i.e. assign their default values)
         init = tf.global_variables_initializer()
@@ -88,7 +98,7 @@ class LogisticRegression:
             sess.run(init)
 
             step_num = 0
-            for epoch in range(num_epochs):
+            for epoch in range(args.epochs):
                 sess.run(iterator.initializer)
                 batch_num = 1
                 running_cost = 0.0
@@ -110,8 +120,8 @@ class LogisticRegression:
                     running_cost += c
 
                     # Display log message every n batches
-                    if batch_num % display_period == 0:
-                        print("Epoch: %04d Batch: %06d cost=%.9f" % (epoch + 1, batch_num, running_cost / display_period))
+                    if batch_num % args.display_interval == 0:
+                        print("Epoch: %04d Batch: %06d cost=%.9f" % (epoch + 1, batch_num, running_cost / args.display_interval))
                         running_cost = 0.0
 
                     train_writer.add_summary(summary, step_num)
@@ -119,9 +129,9 @@ class LogisticRegression:
                     step_num += 1
 
             print("Training Finished!")
-            if save_dir:
-                save_path = saver.save(sess, save_dir)
-                print("Saved model to "+save_dir)
+            if args.save_dir:
+                save_path = saver.save(sess, args.save_dir)
+                print("Saved model to "+args.save_dir)
 
     def score(self, input_fn, batch_size=20, display_period=100):
         tf.reset_default_graph()
@@ -145,16 +155,16 @@ class LogisticRegression:
 
             batch_num = 0
 
+            # Build graph to calculate accuracy
+            label_class = tf.argmax(self.y, 1)
+            correct_preds = tf.equal(self.maxpreds, label_class)
+            correct = tf.reduce_sum(tf.cast(correct_preds, tf.float32))
+
             import timeit
             start = timeit.default_timer()
 
             while True:
                 try:
-                    correct_preds = tf.equal(self.maxpreds, tf.argmax(self.y, 1))
-
-                    # Calculate accuracy
-                    correct = tf.reduce_sum(tf.cast(correct_preds, tf.float32))
-
                     xs, ys = sess.run(next_element)
 
                     total_tested += xs.shape[0]
@@ -174,3 +184,28 @@ class LogisticRegression:
 
         print("Finished evaluation: %.5f%%" % (subtotal/total_tested))
         print(stop - start)
+
+    def predict(self, docs, num_classes=10):
+        tf.reset_default_graph()
+
+        self.width_in = len(self.word_dict.keys())
+        self.width_out = num_classes
+
+        self._build_model()
+
+        inputs = np.zeros([len(docs), len(self.word_dict.keys())])
+        for i, doc in enumerate(docs):
+            for j, word in enumerate(word_tokenize(doc)):
+                if word in self.word_dict:
+                    inputs[i][j] = 1
+
+        with tf.Session() as sess:
+            saver = tf.train.Saver()
+            if self.model_dir:
+                saver.restore(sess, self.model_dir)
+                self.model_dir = None
+
+            label_classes = sess.run(self.maxpreds, feed_dict={self.x: inputs})
+
+        return label_classes
+

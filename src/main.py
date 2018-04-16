@@ -1,6 +1,25 @@
 import argparse
 from dataset import *
 from models.lstm import LSTM
+from models.logreg import LogisticRegression
+
+
+def get_model(args):
+    if args.model == 'lstm':
+        model = LSTM(args)
+    else:
+        model = LogisticRegression(args)
+
+    return model
+
+
+def get_dataset(args):
+    if args.model == 'lstm':
+        dataset = bow_dataset(args.dataset)
+    else:
+        dataset = numpy_dataset(args.dataset)
+
+    return dataset
 
 
 def main():
@@ -17,7 +36,7 @@ def main():
     parser.add_argument('-save-dir', type=str, default='snapshot', help='where to save the snapshot')
     parser.add_argument('-num_classes', type=int, default=10, help='number of classes being predicted')
     parser.add_argument('-model-dir', type=str, default=None, help='filename of model snapshot [default: None]')
-    parser.add_argument('-predict', action='store_true', default=False, help='predict the results for the dataset')
+    parser.add_argument('-predict', type=str, default='', help='predict the results for the dataset')
     parser.add_argument('-test', action='store_true', default=False, help='train or test')
     parser.add_argument('-display-interval', type=int, default=100, help='how many steps to wait before testing [default: 100]')
     parser.add_argument('-test-interval', type=int, default=100, help='how many steps to wait before testing [default: 100]')
@@ -26,19 +45,20 @@ def main():
 
     args = parser.parse_args()
 
-    if args.model == 'lstm':
-        model = LSTM(args)
+    model = get_model(args)
 
-    dataset = numpy_dataset(args.dataset)
-    #preview_dataset(dataset.input_fn, num_items=1)
-    print("Size of dataset:", dataset.size)
-
-    if args.predict is not False:
-        model.predict([input()])
-    elif args.test:
-        model.score(dataset.input_fn, args)
+    if args.predict is not '':
+        print(args.predict, ":", model.predict([args.predict]))
     else:
-        model.train(dataset.input_fn, args)
+        dataset = get_dataset(args)
+        preview_dataset(dataset.input_fn, num_items=1)
+
+        print("Size of dataset:", dataset.size)
+
+        if args.test:
+            model.score(dataset.input_fn, args)
+        else:
+            model.train(dataset.input_fn, args)
 
 
 if __name__ == "__main__":
