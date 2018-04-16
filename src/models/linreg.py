@@ -67,12 +67,12 @@ class LogisticRegression:
         iterator = dataset.make_initializable_iterator()
         next_element = iterator.get_next()
 
-        # Initialize all of the model variables (i.e. assign their default values)
-        init = tf.global_variables_initializer()
-
         # Create an optimization variable
         with tf.name_scope('optimizer'):
-            train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
+            train_step = tf.train.AdamOptimizer(learning_rate).minimize(loss)
+
+        # Initialize all of the model variables (i.e. assign their default values)
+        init = tf.global_variables_initializer()
 
         # Start training
         with tf.Session() as sess:
