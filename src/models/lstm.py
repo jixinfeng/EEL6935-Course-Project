@@ -32,6 +32,23 @@ class LSTM:
         lengths = tf.reduce_sum(tf.sign(input_tensor), axis=1) # find number of words per batch item
         return lengths
 
+    def _load_embeddings(self, embedding_file, sess):
+        tf_word_index = tf.placeholder(tf.int32, shape=[1])
+        tf_word_vec = tf.placeholder(data_type(), shape=[self.args.embedding_dim])
+        update_op = tf.scatter_update(self.embedding_weights, tf_word_index, tf_word_vec)
+        with open(embedding_file) as f:
+            line_num = 1
+            for line in f.readlines():
+                if line_num % 10000 == 0:
+                    print("Line "+line_num)
+                items = line.split()
+                word = items[0]
+                if word in self.word_dict:
+                    word_vec = np.array([float(item) for item in items[1:]], data_type())
+                    word_index = np.array([self.word_dict[word]])
+                    sess.run(update_op, feed_dict={tf_word_index: word_index, tf_word_vec: word_vec})
+                line_num += 1
+
     # Returns a tensorflow variable containing the loss function
     def _build_model(self):
         print("Batch size:",self.args.batch_size)
@@ -43,6 +60,7 @@ class LSTM:
 
             # Create embedding tensor
             self.embedding_weights = tf.get_variable('embedding_weights', [self.args.vocab_size, self.args.embedding_dim], data_type())
+
             # Look up embeddings
             self.embed = tf.nn.embedding_lookup(self.embedding_weights, self.inputs)
 
@@ -118,7 +136,8 @@ class LSTM:
                 param_summaries.append(tf.summary.histogram(var.name, var))
             grads = list(zip(grads, tf.trainable_variables()))
             for grad, var in grads:
-                if (var.name != "embedding_weights:0"):
+                # Embeddings weights are too large to add apparently - grad is a sparse matrix or something
+                if var.name != "embedding_weights:0":
                     param_summaries.append(tf.summary.histogram(var.name + '/gradient', grad))
         merged = tf.summary.merge_all()
 
@@ -149,6 +168,8 @@ class LSTM:
                 # Otherwise, initialize the model
                 init = tf.global_variables_initializer()
                 sess.run(init)
+
+                self._load_embeddings('glove.6B.100d.txt', sess)
 
             # Init graph variables and set up logging
             train_writer = tf.summary.FileWriter('./logs/train/%s' % datetime.datetime.now(), sess.graph)
@@ -300,7 +321,7 @@ class LSTM:
         print(stop - start)
 
     def predict(self, docs):
-        inputs = np.zeros(len(docs), self.args.max_timesteps)
+        inputs = np.zeros([len(docs), self.args.max_timesteps])
         for i, doc in enumerate(docs):
             for j, word in enumerate(word_tokenize(doc)):
                 inputs[i][j] = self.word_dict[word]
