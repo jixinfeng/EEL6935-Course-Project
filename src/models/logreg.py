@@ -133,13 +133,13 @@ class LogisticRegression:
                 save_path = saver.save(sess, args.save_dir)
                 print("Saved model to "+args.save_dir)
 
-    def score(self, input_fn, batch_size=20, display_period=100):
+    def score(self, input_fn, args):
         tf.reset_default_graph()
         dataset = input_fn()
         self._get_widths(dataset)
         self._build_model()
 
-        dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(batch_size))
+        dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(args.batch_size))
         print("Dataset size: "+str(dataset.output_shapes))
         iterator = dataset.make_one_shot_iterator()
         next_element = iterator.get_next()
@@ -171,7 +171,7 @@ class LogisticRegression:
 
                     subtotal += correct.eval({self.x: xs, self.y: ys})
 
-                    if batch_num % display_period == 0:
+                    if batch_num % args.display_interval == 0:
                         print("Batch: %06d %d/%d" % (batch_num, subtotal, total_tested))
 
                     batch_num += 1
