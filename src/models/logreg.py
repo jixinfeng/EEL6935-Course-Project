@@ -15,7 +15,7 @@ class LogisticRegression:
 
         self.word_dict = {}
         vocab_file = os.path.join(os.path.dirname(__file__), '../data/aclImdb/imdb.vocab')
-        with open(vocab_file) as f:
+        with open(vocab_file, encoding='utf-8') as f:
             linenum = 0
             for line in f.readlines():
                 self.word_dict[line[:-1]] = linenum
