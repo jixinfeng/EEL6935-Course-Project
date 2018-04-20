@@ -122,6 +122,7 @@
     
 \section{Related Work}
 \label{related}
+\subsection{Early Research}
     Sentiment analysis has been actively studied for a long time. At the very beginning
     of its research, classifying sentiment of a document is still a very challenging
     task, so earlier research are mostly focus on classifying document based on their 
@@ -140,7 +141,8 @@
     computation power of CPU and GPUs, neural network related techniques 
     started to show great potential in the sentiment analysis 
     domain\cite{kim2014convolutional,barnes2017assessing}.
-    
+
+\subsection{Application in Business Domain}
     Sentiment analysis on reviews has huge application potential. In the domain of 
     shopping for example, more and more consumers nowadays are making 
     purchase decisions about a product not only based on the self introduction of the 
@@ -153,6 +155,23 @@
     have significant influence on purchasing behaviors especially in the domain
     of restaurant and hotel\cite{pang2008opinion}.
     
+    Because online reviews possess such great potential of influence of purchasing
+    behavior. The vendors are showing increasing amount of interests of studying them
+    too. A white paper published back in 2006\cite{kim2006forrester} shows that 
+    there were estimated 75,000 blogs and 1.2 million online posts generated 
+    everyday, and that was more than 10 years ago. A blog post published by twitter
+    in 2013 shows that the average TPS (tweets per second) was 5,700 and the record
+    of 143,199 TPS was created on Aug. 16 2013\cite{tps2013}. With such big number of
+    new text generated everyday, any small disturbance of public opinion on any subject
+    may bring significant impact on people's behavior.
+    
+    With the evolvement of online media streaming service, reviews generated from
+    from watching movie and online media has become one of the major component of 
+    online review. A press release by YouTube claims that with more than 1 billion
+    users from 88 countries and speaking 76 languages, there are 1 billion
+    hours of YouTube Video has been watched daily. These users' rate and review of 
+    video content can be a good source for business decision making. 
+    
     Sentiment analysis of movie reviews is a domain with experimentally conveniency
     because most dataset of movie review gathered already associated with indicators 
     can be easily extracted and processed by computer program such as
@@ -164,18 +183,57 @@
     (50\% accuracy) even in simple binary classification case\cite{pang2002thumbs}.
     So a good research of sentiment analysis on movie reviews is in need.
     
-    When processing natural languages, conventional methods usually treat text as 
-    a stream of bytes or words. Words are treated as categorical data, and the 
-    programs do not put much consideration into the relations
-    between them. While this creates simplicity, it means that all words are treated
-    as being equally different from one another, and this does not align with humans'
-    common understanding of language. Constructing distributional models of words
-    through word embeddings has proven useful for numerous NLP
-    tasks. Researchers in Google spent a lot of effort on this topic and 
-    made quite noticeable contributions\cite{mikolov2013efficient, word2vec}.
-    
 \section{System Architecture}
 \label{model}
+\subsection{Representation and Encoding of Text}
+    Text documents, in its original form, can not be easily processed
+    by computer programs. And the data structure used to represent them usually plays 
+    an important role in text processing\cite{hotho2005brief,allahyari2017brief}. Hence
+    Text preprocessing and encoding should be handled carefully.
+    
+\subsubsection{Bag of Words}
+    One of the most straight forward text representation method is Bag-of-Words (BoW), 
+    which simply keep track of the occurrence and frequency of each word/phrase of the text 
+    while ignore the order of them, and produce a vector representation of text, which 
+    basically means no preprocessing, only encoding. 
+    This make the processing easier but lots of information can be lost in the 
+    representation. 
+    Words are treated as categorical data, and the programs do not put much consideration
+    into the relations between them. While this creates simplicity, it means that all 
+    words are treated as being equally different from one another, and this does not 
+    align with humans' common understanding of language. 
+    Movie review for example, ``I love the story but hate the music'', 
+    and ``I love the music but hate the story'' may end up as same vector representation
+    if BoW is implemented. Hence more comprehensive preprocessing and encoding techniques
+    are need to be applied.
+    Researchers in Google spent a lot of effort on this topic and 
+    made quite noticeable contributions\cite{mikolov2013efficient, word2vec}.
+    
+\subsubsection{Text Preprocessing}
+    Previous research has shown that preprocessing of text is able to product observable
+    influence on the success of text classifications\cite{uysal2014impact}.
+    Generally speaking, text preprocessing usually contains in 4 
+    tasks\cite{allahyari2017brief}:
+    \begin{itemize}
+        \item Tokenization
+        \item Filtering
+        \item Lemmatization
+        \item Stemming
+    \end{itemize}
+    
+    The task of tokenization is to remove the unnecessary parts of the text like 
+    punctuation marks and break the text into smaller building blocks like words and 
+    phrases\cite{webster1992tokenization}. 
+    Filtering is the task aims to remove the part of the text that convey close to zero 
+    information. Example of such elements includes conjunctions and 
+    prepositions\cite{silva2003importance}.
+    Lemmatization and stemming share similar purpose: seeking the correlation between words.
+    Lemmatization groups the words within same role of the text together so they can be 
+    analyzed as one element. Stemming tries to find a root of text first and create the tree
+    structure to represent the relationship between them\cite{hull1996stemming}.
+\subsubsection{Text Encoding and Representation}
+
+
 \subsection{Backend}
 \label{model:back}
     In this course project, we want to implement a convolutional neural network
