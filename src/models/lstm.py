@@ -15,11 +15,25 @@ def data_type():
 class LSTM:
     def __init__(self, args):
         self.args = args
+        self.loss = None
 
         if hasattr(self.args, 'word_dict'):
-            self.word_dict = defaultdict(int, self.args.word_dict)
+            self.word_dict = defaultdict(lambda: 17, self.args.word_dict)
         else:
-            self.word_dict = defaultdict(int)
+            self.word_dict = None
+
+        self.sess = tf.Session()
+
+        if args.model_dir:
+            self.model_dir = args.model_dir
+            self.loss, self.train_step = self._build_model()
+            saver = tf.train.Saver()
+            saver.restore(self.sess, args.model_dir)
+            print("Model restored.")
+
+    def __del__(self):
+        if self.sess:
+            self.sess.close()
 
     def _get_lstm_cell(self):
         return tf.contrib.rnn.BasicLSTMCell(
@@ -33,21 +47,24 @@ class LSTM:
         return lengths
 
     def _load_embeddings(self, embedding_file, sess):
-        tf_word_index = tf.placeholder(tf.int32, shape=[1])
-        tf_word_vec = tf.placeholder(data_type(), shape=[self.args.embedding_dim])
-        update_op = tf.scatter_update(self.embedding_weights, tf_word_index, tf_word_vec)
+        tf_weight_placeholder = tf.placeholder(data_type(), [self.args.vocab_size, self.args.embedding_dim])
+        [weights] = sess.run([self.embedding_weights])
+        update_op = tf.assign(self.embedding_weights, weights)
+
+        count = 0
+        print("Loading embeddings")
         with open(embedding_file) as f:
-            line_num = 1
-            for line in f.readlines():
-                if line_num % 10000 == 0:
-                    print("Line "+line_num)
+            for line_num, line in enumerate(f.readlines()):
+                if (line_num+1) % 10000 == 0:
+                    print("Line:", line_num)
                 items = line.split()
                 word = items[0]
                 if word in self.word_dict:
-                    word_vec = np.array([float(item) for item in items[1:]], data_type())
-                    word_index = np.array([self.word_dict[word]])
-                    sess.run(update_op, feed_dict={tf_word_index: word_index, tf_word_vec: word_vec})
-                line_num += 1
+                    count += 1
+                    ix = self.word_dict[word]
+                    weights[ix] = [float(item) for item in items[1:]]
+
+        sess.run(update_op, feed_dict={tf_weight_placeholder: weights})
 
     # Returns a tensorflow variable containing the loss function
     def _build_model(self):
@@ -103,31 +120,14 @@ class LSTM:
             # Minimize error using cross entropy
             loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.logits, labels=self.labels))
             tf.summary.scalar('batch_loss', loss)
-            return loss
-
-    # Train the model with the Dataset passed in
-    def train(self, input_fn, args):
-        print("Beginning to Train")
-        start_train = timeit.default_timer()
-        dataset = input_fn()
-
-        # Prepare our model and acquire a reference to the loss
-        loss = self._build_model()
-
-        # Batch the data
-        dataset = dataset.shuffle(buffer_size=25000)
-        dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(self.args.batch_size))
-
-        # Get an iterator to the dataset
-        iterator = dataset.make_initializable_iterator()
-        next_element = iterator.get_next()
 
         # Create optimization step
         with tf.name_scope('optimizer'):
-            optimizer = tf.train.AdamOptimizer(args.lr)
+            optimizer = tf.train.AdamOptimizer(self.args.lr)
             grads = optimizer.compute_gradients(loss)
             capped_gvs = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in grads]
             train_step = optimizer.apply_gradients(capped_gvs)
+
 
         # https://github.com/aymericdamien/TensorFlow-Examples/blob/master/examples/4_Utils/tensorboard_advanced.py
         with tf.name_scope('parameters'):
@@ -139,6 +139,30 @@ class LSTM:
                 # Embeddings weights are too large to add apparently - grad is a sparse matrix or something
                 if var.name != "embedding_weights:0":
                     param_summaries.append(tf.summary.histogram(var.name + '/gradient', grad))
+
+        return loss, train_step
+
+    # Train the model with the Dataset passed in
+    def train(self, input_fn, args):
+        print("Beginning to Train")
+        start_train = timeit.default_timer()
+        dataset = input_fn()
+
+        # Batch the data
+        dataset = dataset.shuffle(buffer_size=25000)
+        dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(self.args.batch_size))
+
+        # Prepare our model and acquire a reference to the loss
+        if self.loss is None:
+            self.loss, self.train_step = self._build_model()
+            init = tf.global_variables_initializer()
+            self.sess.run(init)
+            self._load_embeddings('glove.6B.100d.txt', self.sess)
+
+        # Get an iterator to the dataset
+        iterator = dataset.make_initializable_iterator()
+        next_element = iterator.get_next()
+
         merged = tf.summary.merge_all()
 
         with tf.name_scope(self.loss_scope):
@@ -158,108 +182,98 @@ class LSTM:
             embedding_dim_node = tf.placeholder(tf.float32, shape=())     
             embedding_dim_summary = tf.summary.scalar('embedding_dim_size', embedding_dim_node)
 
-        # Start training
-        with tf.Session() as sess:
-            # Load the previous model if it was listed in the constructor
-            saver = tf.train.Saver()
-            if args.model_dir:
-                saver.restore(sess, args.model_dir)
-            else:
-                # Otherwise, initialize the model
-                init = tf.global_variables_initializer()
-                sess.run(init)
 
-                self._load_embeddings('glove.6B.100d.txt', sess)
+        # Init graph variables and set up logging
+        train_writer = tf.summary.FileWriter('./logs/train/%s' % datetime.datetime.now(), self.sess.graph)
 
-            # Init graph variables and set up logging
-            train_writer = tf.summary.FileWriter('./logs/train/%s' % datetime.datetime.now(), sess.graph)
+        # Log hyperparameters
+        summaries = self.sess.run([batch_size_summary, learning_rate_summary, hidden_size_summary, embedding_dim_summary],
+                             feed_dict={
+                                 batch_size_node: args.batch_size,
+                                 learning_rate_node: args.lr,
+                                 hidden_size_node: args.hidden_size,
+                                 embedding_dim_node: args.embedding_dim
+                             })
 
-            # Log hyperparameters
-            summaries = sess.run([batch_size_summary, learning_rate_summary, hidden_size_summary, embedding_dim_summary],
-                                 feed_dict={
-                                     batch_size_node: args.batch_size,
-                                     learning_rate_node: args.lr,
-                                     hidden_size_node: args.hidden_size,
-                                     embedding_dim_node: args.embedding_dim
-                                 })
+        for summary in summaries:
+            train_writer.add_summary(summary, 0)
 
-            for summary in summaries:
-                train_writer.add_summary(summary, 0)
+        step_num = 0
+        saver = tf.train.Saver()
 
-            step_num = 0
-            for epoch in range(args.epochs):
-                sess.run(iterator.initializer)
-                total_cost = 0.
-                batch_num = 1
-                running_cost = 0.
+        for epoch in range(args.epochs):
+            self.sess.run(iterator.initializer)
+            total_cost = 0.
+            batch_num = 1
+            running_cost = 0.
 
-                start = timeit.default_timer()
+            start = timeit.default_timer()
 
-                # Run through the epoch
-                while True:
-                    try:
-                        # Note that each x, y pair in the batch has an epoch number
-                        inputs, labels = sess.run(next_element)
+            # Run through the epoch
+            while True:
+                try:
+                    # Note that each x, y pair in the batch has an epoch number
+                    inputs, labels = self.sess.run(next_element)
 
-                    except tf.errors.OutOfRangeError:
-                        print("End of training dataset.")
-                        break
+                except tf.errors.OutOfRangeError:
+                    print("End of training dataset.")
+                    break
 
-                    # Train using batch data
-                    summary, c, _ = sess.run([merged, loss, train_step], feed_dict={self.inputs: inputs,
-                                                                                    self.labels: labels})
+                # Train using batch data
+                summary, c, _ = self.sess.run([merged, self.loss, self.train_step], feed_dict={self.inputs: inputs,
+                                                                                self.labels: labels})
 
-                    # Accumulate loss
-                    running_cost += c
-                    total_cost += c
+                # New step
+                step_num += 1
 
-                    # Display log message every n batches
-                    if batch_num % args.display_interval == 0:
-                        end = timeit.default_timer()
-                        print("Epoch: %04d Batch: %06d time/batch=%.4f avg_cost=%.9f" %
-                              (epoch + 1, batch_num, (end-start)/self.args.batch_size,
-                               running_cost / args.display_interval))
+                # Accumulate loss
+                running_cost += c
+                total_cost += c
 
-                        preds, maxpreds, label_classes, logits = sess.run([self.preds, self.maxpreds, self.label_class, self.logits],
-                                                                  feed_dict={self.inputs: inputs, self.labels: labels})
+                # Display log message every n batches
+                if batch_num % args.display_interval == 0:
+                    end = timeit.default_timer()
+                    print("Epoch: %04d Batch: %06d time/batch=%.4f avg_cost=%.9f" %
+                          (epoch + 1, batch_num, (end-start)/(self.args.batch_size * self.args.display_interval),
+                           running_cost / args.display_interval))
 
-                        print(label_classes)
-                        print(preds)
-                        print(maxpreds)
-                        print("logits: ",logits)
+                    maxpreds, label_classes = self.sess.run([self.maxpreds, self.label_class],
+                                                        feed_dict={self.inputs: inputs, self.labels: labels})
 
-                        running_cost = 0.
-                        start = timeit.default_timer()
+                    print(label_classes)
+                    print(maxpreds)
 
-                    if step_num % args.log_interval == 0:
-                        train_writer.add_summary(summary, step_num)
-                    batch_num += 1
-                    step_num += 1
+                    running_cost = 0.
+                    start = timeit.default_timer()
 
-                # Calculate the avg loss over the batches for this epoch
-                epoch_loss = total_cost / batch_num
-                print("Total cost:", total_cost)
-                print("Total batches:", batch_num)
-                print("Total avg loss:", epoch_loss)
-                summary, = sess.run([epoch_loss_summary], feed_dict={epoch_loss_node: epoch_loss})
-                train_writer.add_summary(summary, epoch)
+                if step_num % args.log_interval == 0:
+                    train_writer.add_summary(summary, step_num)
+                batch_num += 1
 
-                if step_num % args.save_interval == 0 and args.save_dir:
-                    save_path = saver.save(sess, args.save_dir, global_step=step_num)
-                    print("Saved model to " + save_path)
+            # Calculate the avg loss over the batches for this epoch
+            epoch_loss = total_cost / batch_num
+            print("Total cost:", total_cost)
+            print("Total batches:", batch_num)
+            print("Total avg loss:", epoch_loss)
+            summary, = self.sess.run([epoch_loss_summary], feed_dict={epoch_loss_node: epoch_loss})
+            train_writer.add_summary(summary, epoch)
 
-            end_train = timeit.default_timer()
+            if step_num % args.save_interval == 0 and args.save_dir:
+                save_path = saver.save(self.sess, args.save_dir, global_step=step_num)
+                print("Finished epoch and saved model to " + save_path)
 
-            save_path = saver.save(sess, args.save_dir, global_step=step_num)
-            print("Saved final model model to " + save_path)
+        end_train = timeit.default_timer()
 
-            print("Training Finished after %.2f minutes" % ((end_train - start_train) / 60))
-            print("Time per epoch: %.2fs" % ((end_train-start_train)/args.epochs))
+        save_path = saver.save(self.sess, args.save_dir, global_step=step_num)
+        print("Saved final model model to " + save_path)
+
+        print("Training Finished after %.2f minutes" % ((end_train - start_train) / 60))
+        print("Time per epoch: %.2fs" % ((end_train-start_train)/args.epochs))
 
     def score(self, input_fn, args):
         tf.reset_default_graph()
         dataset = input_fn()
-        loss = self._build_model()
+        loss, _ = self._build_model()
 
         dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(self.args.batch_size))
         print("Dataset size: "+str(dataset.output_shapes))
@@ -316,7 +330,7 @@ class LSTM:
 
             stop = timeit.default_timer()
 
-        print("Finished evaluation: %.5f%%" % (subtotal/total_tested))
+        print("Finished evaluation: %.5f%%" % (100 * subtotal/total_tested))
         print("Total cost:", total_cost)
         print(stop - start)
 
@@ -326,8 +340,7 @@ class LSTM:
             for j, word in enumerate(word_tokenize(doc)):
                 inputs[i][j] = self.word_dict[word]
 
-        with tf.Session() as sess:
-            label_classes = sess.run(self.label_class, feed_dict={self.inputs: inputs})
+        label_classes = self.sess.run(self.maxpreds, feed_dict={self.inputs: inputs})
 
         return label_classes
 
