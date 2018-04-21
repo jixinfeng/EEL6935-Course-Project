@@ -113,12 +113,12 @@
     A brief introduction of related research contribution is in \autoref{related}.
     system architecture and different analysis approaches are introduced and compared 
     in \autoref{model}.
-    The benchmarks used for evaluating the performance are explained in 
-    \autoref{performance}.
-    Our simulation environment, dataset, simulation result are presented in 
-    \autoref{simulation}. The source code of our program, report and 
-    presentation in \LaTeX, as well as the web-application are introduced in \autoref{web}.
-    The team coordination and the conclusion of this paper is in \autoref{conclusion}.
+    The benchmarks used for evaluating the performance and our simulation environment, 
+    dataset, simulation result are presented in \autoref{performance}.
+    The conclusion and the source code of our program, report and 
+    presentation in \LaTeX, as well as the web-application are introduced in 
+    \autoref{conclusion}.
+    The team coordination is introduced in \autoref{team}.
     
 \section{Related Work}
 \label{related}
@@ -186,30 +186,14 @@
 \section{System Architecture}
 \label{model}
 \subsection{Representation and Encoding of Text}
+\label{model:represent}
     Text documents, in its original form, can not be easily processed
     by computer programs. And the data structure used to represent them usually plays 
     an important role in text processing\cite{hotho2005brief,allahyari2017brief}. Hence
     Text preprocessing and encoding should be handled carefully.
     
-\subsubsection{Bag of Words}
-    One of the most straight forward text representation method is Bag-of-Words (BoW), 
-    which simply keep track of the occurrence and frequency of each word/phrase of the text 
-    while ignore the order of them, and produce a vector representation of text, which 
-    basically means no preprocessing, only encoding. 
-    This make the processing easier but lots of information can be lost in the 
-    representation. 
-    Words are treated as categorical data, and the programs do not put much consideration
-    into the relations between them. While this creates simplicity, it means that all 
-    words are treated as being equally different from one another, and this does not 
-    align with humans' common understanding of language. 
-    Movie review for example, ``I love the story but hate the music'', 
-    and ``I love the music but hate the story'' may end up as same vector representation
-    if BoW is implemented. Hence more comprehensive preprocessing and encoding techniques
-    are need to be applied.
-    Researchers in Google spent a lot of effort on this topic and 
-    made quite noticeable contributions\cite{mikolov2013efficient, word2vec}.
-    
 \subsubsection{Text Preprocessing}
+\label{model:represent:preprocess}
     Previous research has shown that preprocessing of text is able to product observable
     influence on the success of text classifications\cite{uysal2014impact}.
     Generally speaking, text preprocessing usually contains in 4 
@@ -231,8 +215,68 @@
     Lemmatization groups the words within same role of the text together so they can be 
     analyzed as one element. Stemming tries to find a root of text first and create the tree
     structure to represent the relationship between them\cite{hull1996stemming}.
-\subsubsection{Text Encoding and Representation}
 
+\subsubsection{Text Encoding and Representation}
+\label{model:represent:encoding}
+    Computer programs will typically only treat text as an array of characters.
+    But machine learning systems can only treat input and output data as numerical
+    scalars or vectors. So in order to feed text to machine learning models, we need to 
+    convert conventional text into mathematically representable forms. One of the most
+    common method to encode text data to match the format requirement of machine
+    learning algorithm is to convert them into numerical vectors. The approach is called
+    ``Vector Space Model'' (VSM). VSM is widely used in the domain of text mining, and
+    it offers great efficiency while processing large scale text data 
+    sets\cite{salton1975vector,hotho2005brief}.
+    
+    In VSP representation of text, each word can be represented by a numerical value 
+    used for encoding called the weight of the word. 
+    One of the most straight forward text representation method is Bag-of-Words (BoW), 
+    which simply keep track of the occurrence and frequency of each word/phrase of the text 
+    while ignore the order of them, and produce a vector representation of text, which 
+    basically means no preprocessing, only encoding. 
+    This make the processing easier but lots of information can be lost in the 
+    representation. 
+    Words are treated as categorical data, and the programs do not put much consideration
+    into the relations between them. While this creates simplicity, it means that all 
+    words are treated as being equally different from one another, and this does not 
+    align with humans' common understanding of language. 
+    Movie review for example, ``I love the story but hate the music'', 
+    and ``I love the music but hate the story'' may end up as same vector representation
+    if BoW is implemented. Hence more comprehensive preprocessing and encoding techniques
+    are need to be applied.
+    Researchers in Google spent a lot of effort on this topic and 
+    made quite noticeable contributions\cite{mikolov2013efficient, word2vec}.
+    
+    When written in mathematical terms, we can define the collection of text documents
+    to be $$\mathcal{D}=\{d_1, d_2,\ldots,d_D\}$$, and
+    let $$\mathcal{V}=\{v_0, v_1,\ldots, v_{m-1}\}$$ be an m-word predefined set called
+    vocabulary. Each word in $\mathcal{V}$ will have a corresponding feature in
+    machine learning model. The notation of frequency of a word $v\in\mathcal{V}$ occurred 
+    in document $d\in\mathcal{D}$ is $f_d(v)$, hence a document can be represented as
+    a vector $$\bar{d}=\{f_d(v_1),f_d(v_2),\ldots\}$$.
+    And the notation of total number of documents
+    $d\in\mathcal{D}$ containing the word $w$ is represented as $f_\mathcal{D}(v)$
+    
+    We can also use metrics other than the word frequency. Boolean weight, for example, 
+    assigns 
+    $$\omega_{ij} = \begin{cases} 
+        1 & v_i \in d_j\\
+        0 & v_i \notin d_j
+    \end{cases}$$
+    
+    The Term Frequency-inverse Document Frequency (TF-IDF) is also a popular metric of
+    word weighting metric. In this metric scheme, the weight of each word $v$ 
+    in document $d$ can be calculated as:
+    $$q(v)=f_d(v)\log\frac{\left|\mathcal{D}\right|}{f_\mathcal{D}(v)}$$
+    
+    Based on the weighting metric, a text/document can be represented by a vector 
+    $$w(d)=(w(d,v_1),w(d,v_2),\ldots)$$,
+    Hence the similarity between two documents $d_1$ and $d_2$ can be measured using 
+    cosine similarity\cite{salton1988term}
+    $$S(d_1,d_2)=\cos(\theta)=\frac{d_1d_2}{
+    \sqrt{\sum_{i=1}^{\left|\mathcal{V}\right|}{v_{1i}^2}}
+    \sqrt{\sum_{i=1}^{\left|\mathcal{V}\right|}{v_{2i}^2}}
+    }$$
 
 \subsection{Backend}
 \label{model:back}
@@ -241,55 +285,26 @@
     generated by a bag-of-words model paired with a conventional machine learning
     technique, logistic regression.
     
-\subsubsection{Bag-of-Words Logistic Regression}
-\label{model:back:bow}
+\subsubsection{Logistic Regression}
+\label{model:back:lr}
     Traditionally, sentiment analysis can be done by conventional machine learning
     methods such as Na\"ive Bayes, maximum entropy, logistic regression and 
     support vector machines (SVM). 
-    
-    Computer programs will typically only treat text as an array of characters.
-    In order to feed text to machine learning models, we need to 
-    convert conventional text into mathematically representable forms. In this
-    paper, we use a vector space model to represent the sentences to be analyzed.
-    Depending on the research domain, this can be called a Bag-of-Words model, 
-    Bag-of-Features model or Vector Space model\cite{salton1975vector}.
-    
-    Let $$\mathcal{W}=\{w_0, w_1,\ldots, w_{m-1}\}$$ be an m-word predefined set. Each 
-    word in $\mathcal{W}$ will have a corresponding feature in our machine learning model.
-    
-    Let $n_j(d_i)$ be a metric measuring the occurrence of word $w_j$
-    in sentence $d_i$. Then each sentence can be converted into a vector representation 
-    $$\bar{d_i}=(n_0(d_i),n_1(d_i),\ldots,n_{m-1}(d_i))$$.
-    
-    Depending on how the metrics of words are defined, our vector representations can be
-    generally categorized as feature frequency representations or feature presence
-    representations\cite{pang2002thumbs}. With frequency representations, the metric 
-    $n_j(d_i)$ is defined as follows: 
-     
-    $$n_j(d_i) = \frac{\text{\# of }w_j \text{in } d_i}{\text{\# of words in } d_i}$$
-
-    With feature presence representations, each metric $n_j(d_i)$ is a binary
-    variable indicating whether or not word $w_j$ occurs in sentence $d_i$:
-     
-    $$n_j(d_i) = \begin{cases} 
-        0 & w_j \in d_i\\
-        1 & w_j \notin d_i
-    \end{cases}$$
-    
-    To establish a baseline for our later work with Deep Neural Networks (DNN), we have
+    To establish a baseline for our later work with Neural Networks, we have
     created a implemented a basic logistic regression model using tensorflow. Given a 
-    dictionary of size $N$, each input $x_i$ is a $N \times 1$ dimension bag-of-words encoding
-    for the $i$-th sentence in our training set. Assuming that each $x_i$ belongs to one of $C$
-    possible classes, $W$ is a $N \times C$ weight matrix, and $b$ is a $C \times 1$ bias,
-    our prediction $\hat{y}$ is defined as follows:
-        
+    dictionary of size $N$, each input $x_i$ is a $N \times 1$ dimension bag-of-words 
+    encoding for the $i$-th sentence in our training set. Assuming that each $x_i$ 
+    belongs to one of $C$ possible classes, $W$ is a $N \times C$ weight matrix, 
+    and $b$ is a $C \times 1$ bias, our prediction $\hat{y}$ 
+    is defined as follows\cite{ng2002discriminative,hosmer2013applied}:
+
     $$\hat{y} = \sigma(x^T_i W +b)$$
     $$\sigma (x)_{j}={\frac {e^{x_{j}}}{\sum _{i=1}^{N}e^{x_{i}}}}$$
     
-    Note that the softmax function maps each dimension of its input to a value between 0 and 1, and the
-    transformation also normalizes the predicted probabilities such that they sum to 1
-    for multi-class prediction. Each entry $\hat{y}_i$ corresponds to the predicted
-    probability of the input sentence $x$ belonging to class $i$.
+    Note that the softmax function maps each dimension of its input to a value between 0
+    and 1, and the transformation also normalizes the predicted probabilities such that
+    they sum to 1 for multi-class prediction. Each entry $\hat{y}_i$ corresponds to 
+    the predicted probability of the input sentence $x$ belonging to class $i$.
     \begin{figure}[]
         \includegraphics[width=0.45\textwidth]{figure/model_architecture}
         \caption{Our logistic regression architecture visualized with Tensorboard.}
@@ -297,6 +312,37 @@
     
     Since this model is both commonly used and simple to implement, it forms a good baseline
     for our future work. Our results for this model are reported later on in the document.
+
+\subsubsection{Long Short-Term Memory (LSTM)}
+\label{model:back:lstm}
+    The LSTM model was originally proposed by Sepp Hochreiter and 
+    J\"urgen Schmidhuber back in 1997\cite{hochreiter1997long}, and usually serves 
+    as a building block of larger
+    recurrent neural network (RNN) layers. The basic object of LSTM is to fine-tune
+    the memory length of the input and system state over an arbitrary period of time
+    hence preventing premature ``memory loss'' and gradient vanishing of RNN.
+    
+    Given a word sequence $S=\{w_0,w_1,\ldots,w_{l-1}\}$ with length $l$, the states
+    of LSTM are updated as:
+    $$
+    \begin{bmatrix} 
+    i_t\\f_t\\o_t\\c_t 
+    \end{bmatrix} = 
+    \begin{bmatrix}
+    \sigma\\\sigma\\\sigma\\\tanh
+    \end{bmatrix}
+    S[h_{t-1},x_t]
+    $$
+    , in which $c_t=f_t\circ c_{t-1} + i_t\circ\hat{c_t}$ and $h_t=o_t\circ\tanh{c_t}$.
+    At time $t$ in this relationship, $c_t$ and $h_t$ are the LSTM memory and 
+    hidden state, $\hat{c_t}$ is the current cell state. The input at time $t$ 
+    is $x_t$ and the input/forget/output gate activation are represented by $i$, 
+    $f$ and $o$ respectively. $\sigma$ and $\circ$ are notations of logistic 
+    sigmoid function and element-wise multiplication\cite{zhou2016text}.
+    
+    Depending on the requirement on system causality, the LSTM can be applied on
+    both directions of time, which becomes Bidirectional LSTM 
+    (BLSTM)\cite{schuster1997bidirectional,barnes2017assessing}.
 
 \subsubsection{Convolutional Neural Network}
 \label{model:back:cnn}
@@ -358,8 +404,8 @@
     vectors by rescaling $w$ to have $||w||_2 = s$ whenever $||w||_2 > s$ after a gradient
     decent step.
 
-\subsection{Stretch Goals}
-\label{model:stretch}
+\subsection{Front End}
+\label{model:front}
     
     Beside the system architecture described in \autoref{model:back}, we also have a
     list of stretch goals. These include a LSTM based sentiment analysis and a 
@@ -367,43 +413,16 @@
     goals are still yet to be fixed, and it will be will be included in the final project
     report once finished. 
 
-\subsubsection{Long Short-Term Memory (LSTM)}
-\label{model:stretch:lstm}
-    The LSTM model was originally proposed by Sepp Hochreiter and J\"urgen Schmidhuber back in 
-    1997\cite{hochreiter1997long}, and usually serves as a building block of larger
-    recurrent neural network (RNN) layers. The basic object of LSTM is to fine-tune
-    the memory length of the input and system state over an arbitrary period of time
-    hence preventing premature ``memory loss'' and gradient vanishing of RNN.
-    
-    Given a word sequence $S=\{w_0,w_1,\ldots,w_{l-1}\}$ with length $l$, the states
-    of LSTM are updated as:
-    $$
-    \begin{bmatrix} 
-    i_t\\f_t\\o_t\\c_t 
-    \end{bmatrix} = 
-    \begin{bmatrix}
-    \sigma\\\sigma\\\sigma\\\tanh
-    \end{bmatrix}
-    S[h_{t-1},x_t]
-    $$
-    , in which $c_t=f_t\circ c_{t-1} + i_t\circ\hat{c_t}$ and $h_t=o_t\circ\tanh{c_t}$.
-    At time $t$ in this relationship, $c_t$ and $h_t$ are the LSTM memory and 
-    hidden state, $\hat{c_t}$ is the current cell state. The input at time $t$ 
-    is $x_t$ and the input/forget/output gate activation are represented by $i$, 
-    $f$ and $o$ respectively. $\sigma$ and $\circ$ are notations of logistic 
-    sigmoid function and element-wise multiplication\cite{zhou2016text}.
-    
-    Depending on the requirement on system causality, the LSTM can be applied on
-    both directions of time, which becomes Bidirectional LSTM 
-    (BLSTM)\cite{schuster1997bidirectional,barnes2017assessing}.
-
 \subsubsection{Web Interface}
-\label{model:stretch:web}
+\label{model:front:web}
     To improve the user-friendliness of this project, we also plan to create a 
     web-based user interface for the program. With a webpage, selecting
     the model for sentiment analysis can be done in a mouse click instead of 
     enter a series of command line parameters, the output can also
     be read from web browser, not a standard output stream in terminal. 
+    
+\subsubsection{Web Hosting}
+\label{model:front:host}
 
 \section{Performance Evaluation}
 \label{performance}
@@ -466,6 +485,7 @@
     capable of handling the multinomial linear regression problem due to intensive
     memory usage. Thus we have only provided results from our tensorflow
     model in the multinomial case.
+
 \subsection{Future Experiments}
     In addition to using the above data set, we will also train and test using the 
     Stanford Sentiment Treebank, which is one of the data sets Kim evaluated in 
@@ -484,66 +504,16 @@
     regression model, so a more fair comparison might include a model that has
     an additional regularization term added to its cost function.
     
-\section{Simulation Environment and Result}
-\label{simulation}
-
-\section{Web-based Real-time Sentiment Analysis}
-\label{web}
-
 \section{Conclusion}
 \label{conclusion}
 
-%
-%
-%
-%\section{Current Progress and Project Management}
-%\label{manage}
-%
-%\subsection{Current Status \& Team Coordination}
-%\label{manage:status}
-%    The course project has been overall well maintained and tracked. 
-%    The whole project including documents and source code are stored
-%    in a git repository hosted on GitHub 
-%    (\url{https://github.com/ufjfeng/EEL6935-Course-Project}),
-%    hence the contribution of each team member had been tracked.
-%    
-%    The current project status is:
-%    \begin{description}
-%        \item[\CheckedBox] Choose topic
-%        \item[\CheckedBox] Write proposal
-%        \item[\CheckedBox] Gather dataset
-%        \item[\CheckedBox] Build baseline model with Logistic Regression
-%        \item[\CheckedBox] Write mid-term report 
-%        \item[$\Box$] Build CNN model
-%        \item[$\Box$] (stretch) Build LSTM model
-%        \item[$\Box$] (stretch) Build web interface
-%        \item[$\Box$] Write project documentation
-%        \item[$\Box$] Write final report
-%    \end{description}
-%
-%\subsection{Weekly Plans and Deliverables}
-%\label{manage:plan}
-%
-%    \begin{center}
-%        \begin{tabular}{| l | p{7cm} |}
-%        \hline
-%        Week & Plan \\ \hline
-%        1-3 & Read paper and select project topic \\ \hline
-%        4 & Write project proposal and make slides \\ \hline
-%        6-8 & Build project baseline model and finalize design \\ \hline
-%        9 & Write midterm project report and make slides \\ \hline
-%        10-13 & Build CNN model and work on stretch goals \\ \hline
-%        14-15 & Finalize course project, collect data and write final report \\ \hline
-%        \end{tabular}
-%    \end{center}
-%
-%    By the end of this semester, we will dilever:
-%    \begin{itemize}
-%    \item A working program for sentiment analysis and related documents
-%    \item Final report of the project
-%    \item Slides for in-class presentation
-%    \item GitHub repository
-%    \end{itemize}
+\section{Future Work}
+\label{future}
+
+\section{Team Coordination}
+\label{team}
+
+
 
 \bibliographystyle{IEEEtran}
 \bibliography{eel6935_final.bib}
