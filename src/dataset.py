@@ -7,7 +7,6 @@ def bow_parser(vocab_size, is_multiclass=True):
     """
         Returns function for parsing sparse bag-of-words text files and encoding feature vectors
         for either binomial or multinomial regression.
-
     """
     # Produces y vectors that look like [0, 0, 0, 0, 1, 0, 0, 0, 0, 0]
     # Produces x vectors that look like [0, 1, 1, 0, 1, 0, 0, 0, 1, 0, ...]
