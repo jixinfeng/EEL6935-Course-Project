@@ -337,7 +337,7 @@
     allowed LSTM to learn continuously without reset.
     
     Since then, researchers start to propose various innovative LSTM modifications.
-    Extended Karman Filter can be used for training the LSTM to solve tome pathological
+    Extended Karman Filter can be used for training the LSTM to solve some pathological
     learning cases\cite{perez2003kalman}. When implemented to operate on both temporal
     directions, LSTM then becomes Bidirectional LSTM 
     (Bi-LSTM)\cite{schuster1997bidirectional,barnes2017assessing}.
@@ -360,9 +360,56 @@
     hidden state, $\hat{c_t}$ is the current cell state. The input at time $t$ 
     is $x_t$ and the input/forget/output gate activation are represented by $i$, 
     $f$ and $o$ respectively. $\sigma$ and $\circ$ are notations of logistic 
-    sigmoid function and element-wise multiplication\cite{zhou2016text}.
+    sigmoid function and element-wise multiplication.\cite{zhou2016text}.
+        
+    To build our LSTM model, first we define a dictionary 
+    $D = [w_1, w_2...w_N]$ 
+    to contain the set of all words representable by our LSTM network. The $i$-th
+    input to our LSTM is a vector
+    $$
+    v_i = [ \pi_{i1}, \pi_{i2}... \pi_{iL}]
+    $$
+    corresponding to a movie review $r_i$ of length $L$, where $\pi_{ij}$ is the dictionary index of 
+    the $j$-th word of $r$. To see how this would work in practice, let 
+    $D = [\text{cat}, \text{dog}, \text{meow}]$. Then the review 
+    $r =  [\text{dog}, \text{dog}, \text{cat}, \text{meow}]$ would be encoded 
+    $v = [1, 1, 0, 2]$, assuming a 0-indexed dictionary.
     
+    In order to help the LSTM learn how to interpret the words in a movie review,
+    each sentence's words are embedded inside a weight matrix $W_e$ with
+    dimensions $N \times E$. The value $E$ is a hyperparameter known as the 
+    embedding dimension and often ranges between 50 and 300. The rows of the
+    embedding matrix are called word vectors, and approaches such as word2vec 
+    \cite{word2vec} and GloVe \cite{pennington2014glove} can be used to learn 
+    distributed embeddings for each word present in a corpus.
     
+    After initializing the hidden state to zeros at the beginning of each batch, sequences
+    of embeddings
+    $$
+    s_i = [ e_{i1}, e_{i2}, .. e_{iL}] 
+    $$
+    are then sequentially fed into the LSTM layer of our network, where each $e_{ij}$ is
+    the embedding vector for the word $w_{ij}$, looked-up according to the input index
+    $\pi_{ij}$. Only the final output state of the LSTM is used for prediction, and it is
+    fed into a fully-connected softmax layer.
+    
+    In our model, we use pre-trained 100-dimension GloVe embeddings to initialize
+    our word embedding matrix whenever vocabulary words are contained in the 
+    400,000 word download provided by Standford\cite{pennington2014glove}. 
+    The remainder our of word vectors are initialized at random at the beginning 
+    of training using a Glorot distribution\cite{pmlr-v9-glorot10a}.
+    All word vectors are updated via backpropagation
+    throughout the training process. 
+     
+    In practice, inputs consist of fixed
+    length vectors, and all entries after the end of the review are  marked by setting
+    $\pi_{ij}$ to the sentinel value 0, as this allows reviews to be inputted in parallel and
+    better utilize hardware resources such as GPUs.
+    
+    \begin{figure}
+        \includegraphics[width=0.45\textwidth]{figure/lstm_architecture}
+        \caption{Our LSTM architecture visualized with Tensorboard.}
+    \end{figure}
 
 \subsubsection{Convolutional Neural Network}
 \label{model:back:cnn}
@@ -381,10 +428,11 @@
      figure credit: \cite{kim2014convolutional}}
     \end{figure*}
 
-    Distributed word embeddings, proposed by Mikolov et al.
-    in 2013\cite{word2vec}, allow us to represent a word as a vector in
-    multi-dimensional space, and they form the basis for feeding text into our deep
-    learning model.
+    As with the LSTM model, distributed word embeddings allow us to represent a 
+    word as a vector in multi-dimensional space, and they form the basis for feeding 
+    text into the deep learning model. However, instead of feeding word vectors into
+    our model one-by-one, we concatenate our word vectors together into a fixed-length
+    input vector which we convolve over to create feature maps. 
 
     Let $x_{i} \in \mathbb{R}^k$ be a dimentional word vector representing the $i$-th word in the
     sentence. Thus, the sentence would be represented by
@@ -426,6 +474,34 @@
     
     Due to the strict limitation of man-power and time, we didn't have chance to 
     implement the CNN and compare it with other implementations.
+
+\subsection{Dataset Preprocessing}
+    Evaluating both sequential and non-sequential models required our data to be inputted
+    in different ways to our Logistic Regression model. To train our baseline logistic regression
+    model, we used the tensorflow Dataset API to extract preprocessed word counts for each
+    review from from a feature file prepared by \cite{maas2011learning}. Due to the linearity of
+    the logistic regression model and the Zipf distribution of word frequencies, we chose
+    to ignore the word counts and instead use binary features.
+    
+    When training the LSTM, we set the max size of our reviews at 200 tokens to ease
+    computation constraints. Reviews of excess length were truncated, and shorter reviews 
+    were padded with zeros. Word tokenization was preformed using the nltk python library,
+    which uses a custom version of the Stanford Treebank tokenizer. In addition, we separated
+    periods, quotation marks, dashes, and slashes into their own tokens, so that the LSTM 
+    would be able to learn how to generalize about their functionality. Treating dashes as tokens,
+    for instance will often reduce the size of the model vocabulary, since words such as
+     "broken-hearted" can be decomposed into three tokens: "broken", "-", and "hearted".
+     
+    In addition, we attempted to ameliorate the problem of zero-shot earning by removing 
+    infrequently occurring words from our vocabulary. We replaced the bottom-$k$ 
+    least-frequently occurring words with an $<UNK>$ token, which the model could then
+    learn to represent any out-of-vocabulary term. Since the Zipf distribution of word frequencies
+    means that most text content is composed of a small number of different words, removing all
+    single-occurrence words from our dataset modified less than 0.75\% of the training dataset.
+
+   
+\subsection{Network Training}
+   
 
 \subsection{Front End}
 \label{model:front}
