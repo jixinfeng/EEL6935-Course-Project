@@ -305,7 +305,7 @@
     and 1, and the transformation also normalizes the predicted probabilities such that
     they sum to 1 for multi-class prediction. Each entry $\hat{y}_i$ corresponds to 
     the predicted probability of the input sentence $x$ belonging to class $i$.
-    \begin{figure}[]
+    \begin{figure}
         \includegraphics[width=0.45\textwidth]{figure/model_architecture}
         \caption{Our logistic regression architecture visualized with Tensorboard.}
     \end{figure}
@@ -436,13 +436,30 @@
     to build the front end of the system, so people can use the system by visiting a
     url from web browser.
     
-\subsubsection{Web Interface}
+\subsubsection{Web Interface by Python \& Flask}
 \label{model:front:web}
-    To improve the user-friendliness of this project, we also plan to create a 
-    web-based user interface for the program. With a webpage, selecting
-    the model for sentiment analysis can be done in a mouse click instead of 
-    enter a series of command line parameters, the output can also
-    be read from web browser, not a standard output stream in terminal. 
+    Our project is written in Python, so it is only natural to think the web interface =
+    should also be build with web frameworks in Python environments. 
+    In this project, the web interface it done by the Micro-framework for 
+    Python called Flask\cite{ronacher2010flask,grinberg2018flask}.
+    
+    The web interface contains a page for data input/model selection and another page for
+    showing results.
+    
+    \begin{figure}
+        \center\includegraphics[width=0.4\textwidth]{figure/flask_input}
+        \caption{Page for data input and model selection. Both baseline model (logistic
+        regression) and LSTM model can be selected. And output can be set to be binary 
+        or multi-level}
+        \label{fig:flask_in}
+    \end{figure}
+    
+    \begin{figure}
+        \center\includegraphics[width=0.4\textwidth]{figure/flask_output}
+        \caption{Page for data output, the model selected, output scale and
+        sentiment analysis score are shown in a table}
+        \label{fig:flask_out}
+    \end{figure}
     
 \subsubsection{Web Hosting}
 \label{model:front:host}
