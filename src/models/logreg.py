@@ -4,6 +4,7 @@ import numpy as np
 from collections import defaultdict
 from nltk import word_tokenize
 
+
 # Built referencing https://github.com/aymericdamien/TensorFlow-Examples/blob/master/examples/2_BasicModels/logistic_regression.py
 # and https://web.stanford.edu/class/cs20si/2017/lectures/notes_03.pdf
 
@@ -18,18 +19,20 @@ class LRConfig():
             self.word_dict = defaultdict(int)
             with open(vocab_file, encoding='utf-8') as f:
                 for linenum, line in enumerate(f.readlines()):
-                    self.word_dict[line[:-1]] = linenum
+                    self.word_dict[line[:-1]] = linenum+1
             # Safety check
             if width_in:
-                assert width_in == linenum, "Error: width_in does not match size of vocab_file"
-            self.width_in = linenum
+                assert width_in == linenum+1, "Error: width_in does not match size of vocab_file"
+            self.width_in = linenum+1
         else:
             self.width_in = width_in
+
 
 class LogisticRegression:
     def __init__(self, config, model_dir=None, sess=None):
         self.config = config
         self.model_dir = model_dir
+        self.word_dict = self.config.word_dict
 
         # Create a tf session if needed
         if sess is None:
@@ -41,7 +44,7 @@ class LogisticRegression:
         if self.model_dir:
             self.loss = self._build_model(config)
             saver = tf.train.Saver()
-            saver.restore(sess, self.model_dir)
+            saver.restore(self.sess, self.model_dir)
             print("Model restored.")
         else:
             self.loss = None

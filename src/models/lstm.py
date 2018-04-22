@@ -18,20 +18,22 @@ class LSTM:
     def __init__(self, args):
         self.args = args
         self.loss = None
+        self.graph = tf.Graph()
 
         if hasattr(self.args, 'word_dict'):
             self.word_dict = defaultdict(lambda: 1, self.args.word_dict)
         else:
             self.word_dict = None
 
-        self.sess = tf.Session()
+        self.sess = tf.Session(graph=self.graph)
 
         if args.model_dir:
             self.model_dir = args.model_dir
             self.loss, self.train_step = self._build_model()
-            saver = tf.train.Saver()
-            saver.restore(self.sess, args.model_dir)
-            print("Model restored.")
+            with self.graph.as_default():
+                saver = tf.train.Saver()
+                saver.restore(self.sess, args.model_dir)
+                print("Model restored.")
 
     def __del__(self):
         if self.sess:
@@ -49,9 +51,10 @@ class LSTM:
         return lengths
 
     def _load_embeddings(self, embedding_file, sess):
-        tf_weight_placeholder = tf.placeholder(data_type(), [self.args.vocab_size, self.args.embedding_dim])
-        [weights] = sess.run([self.embedding_weights])
-        update_op = tf.assign(self.embedding_weights, weights)
+        with self.graph.as_default():
+            tf_weight_placeholder = tf.placeholder(data_type(), [self.args.vocab_size, self.args.embedding_dim])
+            [weights] = sess.run([self.embedding_weights])
+            update_op = tf.assign(self.embedding_weights, weights)
 
         count = 0
         print("Loading embeddings")
@@ -73,76 +76,77 @@ class LSTM:
     # Returns a tensorflow variable containing the loss function
     def _build_model(self):
         print("Batch size:",self.args.batch_size)
-        with tf.name_scope('input'):
-            # Input data
-            self.inputs = tf.placeholder(tf.int32, shape=[self.args.batch_size, self.args.max_timesteps])
-            self.labels = tf.placeholder(tf.float32, shape=[self.args.batch_size, self.args.num_classes])
-            self.label_class = tf.argmax(self.labels, 1)
+        with self.graph.as_default():
+            with tf.name_scope('input'):
+                # Input data
+                self.inputs = tf.placeholder(tf.int32, shape=[self.args.batch_size, self.args.max_timesteps])
+                self.labels = tf.placeholder(tf.float32, shape=[self.args.batch_size, self.args.num_classes])
+                self.label_class = tf.argmax(self.labels, 1)
 
-            # Create embedding tensor
-            self.embedding_weights = tf.get_variable('embedding_weights', [self.args.vocab_size, self.args.embedding_dim], data_type())
+                # Create embedding tensor
+                self.embedding_weights = tf.get_variable('embedding_weights', [self.args.vocab_size, self.args.embedding_dim], data_type())
 
-            # Look up embeddings
-            self.embed = tf.nn.embedding_lookup(self.embedding_weights, self.inputs)
+                # Look up embeddings
+                self.embed = tf.nn.embedding_lookup(self.embedding_weights, self.inputs)
 
-        with tf.name_scope('lstm'):
-            self.lstm_cell = self._get_lstm_cell()
-            self._initial_state = self.lstm_cell.zero_state(self.args.batch_size, data_type())
+            with tf.name_scope('lstm'):
+                self.lstm_cell = self._get_lstm_cell()
+                self._initial_state = self.lstm_cell.zero_state(self.args.batch_size, data_type())
 
-            # get a list of timesteps
-            inputs = tf.unstack(self.embed, num=self.args.max_timesteps, axis=1)
-            print("inputs shape:", self.embed.shape)
-            print("single timestep shape: ", inputs[0].shape)
-            print("inputs len:", len(inputs))
+                # get a list of timesteps
+                inputs = tf.unstack(self.embed, num=self.args.max_timesteps, axis=1)
+                print("inputs shape:", self.embed.shape)
+                print("single timestep shape: ", inputs[0].shape)
+                print("inputs len:", len(inputs))
 
-            self.lengths = self._sequence_lengths(self.inputs)
-            outputs, state = tf.nn.static_rnn(self.lstm_cell, inputs,
-                                              sequence_length=self.lengths,
-                                              initial_state=self._initial_state)
+                self.lengths = self._sequence_lengths(self.inputs)
+                outputs, state = tf.nn.static_rnn(self.lstm_cell, inputs,
+                                                  sequence_length=self.lengths,
+                                                  initial_state=self._initial_state)
 
-            index = tf.range(0, self.args.batch_size) * self.args.max_timesteps + (self.lengths - 1)
-            flat = tf.reshape(outputs, [-1, self.args.hidden_size])
-            self.outputs = tf.gather(flat, index)
+                index = tf.range(0, self.args.batch_size) * self.args.max_timesteps + (self.lengths - 1)
+                flat = tf.reshape(outputs, [-1, self.args.hidden_size])
+                self.outputs = tf.gather(flat, index)
 
-        with tf.name_scope('softmax'):
-            # Set model weights
-            self.W = tf.get_variable("W", shape=(self.args.hidden_size, self.args.num_classes))
+            with tf.name_scope('softmax'):
+                # Set model weights
+                self.W = tf.get_variable("W", shape=(self.args.hidden_size, self.args.num_classes))
 
-            self.b = tf.get_variable("b", shape=self.args.num_classes)
+                self.b = tf.get_variable("b", shape=self.args.num_classes)
 
-            self.logits = tf.matmul(self.outputs, self.W) + self.b
+                self.logits = tf.matmul(self.outputs, self.W) + self.b
 
             #eps = tf.get_variable("eps", shape=[1, self.args.num_classes],
             #                      initializer=tf.constant_initializer(0.0000001 * np.ones([1, self.args.num_classes])),
             #                      trainable=False)
 
-            self.preds = tf.nn.softmax(self.logits)
+                self.preds = tf.nn.softmax(self.logits)
 
-            self.maxpreds = tf.argmax(self.preds, 1)
+                self.maxpreds = tf.argmax(self.preds, 1)
 
-        with tf.name_scope('loss') as self.loss_scope:
-            # Minimize error using cross entropy
-            loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.logits, labels=self.labels))
-            tf.summary.scalar('batch_loss', loss)
+            with tf.name_scope('loss') as self.loss_scope:
+                # Minimize error using cross entropy
+                loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.logits, labels=self.labels))
+                tf.summary.scalar('batch_loss', loss)
 
-        # Create optimization step
-        with tf.name_scope('optimizer'):
-            optimizer = tf.train.AdamOptimizer(self.args.lr)
-            grads = optimizer.compute_gradients(loss)
-            capped_gvs = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in grads]
-            train_step = optimizer.apply_gradients(capped_gvs)
+            # Create optimization step
+            with tf.name_scope('optimizer'):
+                optimizer = tf.train.AdamOptimizer(self.args.lr)
+                grads = optimizer.compute_gradients(loss)
+                capped_gvs = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in grads]
+                train_step = optimizer.apply_gradients(capped_gvs)
 
 
-        # https://github.com/aymericdamien/TensorFlow-Examples/blob/master/examples/4_Utils/tensorboard_advanced.py
-        with tf.name_scope('parameters'):
-            param_summaries = []
-            for var in tf.trainable_variables():
-                param_summaries.append(tf.summary.histogram(var.name, var))
-            grads = list(zip(grads, tf.trainable_variables()))
-            for grad, var in grads:
-                # Embeddings weights are too large to add apparently - grad is a sparse matrix or something
-                if var.name != "embedding_weights:0":
-                    param_summaries.append(tf.summary.histogram(var.name + '/gradient', grad))
+            # https://github.com/aymericdamien/TensorFlow-Examples/blob/master/examples/4_Utils/tensorboard_advanced.py
+            with tf.name_scope('parameters'):
+                param_summaries = []
+                for var in tf.trainable_variables():
+                    param_summaries.append(tf.summary.histogram(var.name, var))
+                grads = list(zip(grads, tf.trainable_variables()))
+                for grad, var in grads:
+                    # Embeddings weights are too large to add apparently - grad is a sparse matrix or something
+                    if var.name != "embedding_weights:0":
+                        param_summaries.append(tf.summary.histogram(var.name + '/gradient', grad))
 
         return loss, train_step
 
@@ -162,7 +166,7 @@ class LSTM:
             self.loss, self.train_step = self._build_model()
             init = tf.global_variables_initializer()
             self.sess.run(init)
-            self._load_embeddings('glove.6B.100d.txt', self.sess)
+            self._load_embeddings('../data/glove.6B.100d.txt', self.sess)
 
         # Get an iterator to the dataset
         iterator = dataset.make_initializable_iterator()
@@ -353,11 +357,15 @@ class LSTM:
         return 100 * subtotal/total_tested
 
     def predict(self, docs):
+        assert self.word_dict is not None, "word_dict must not be None"
         inputs = np.zeros([len(docs), self.args.max_timesteps])
         for i, doc in enumerate(docs):
             for j, word in enumerate(word_tokenize(doc.replace('.',' . '). replace('-', ' - '))):
+                if j == self.args.max_timesteps:
+                    break
                 inputs[i][j] = self.word_dict[word.lower()]
 
+        print(inputs)
         label_classes = self.sess.run(self.maxpreds, feed_dict={self.inputs: inputs})
 
         return label_classes
