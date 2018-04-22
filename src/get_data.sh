@@ -8,3 +8,4 @@ rm aclImdb_v1.tar.gz
 echo "Data Set Download Completed."
 cd ..
 sh make_datasets.sh
+sh download_embeddings.sh

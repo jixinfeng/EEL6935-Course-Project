@@ -4,6 +4,8 @@ import datetime
 import timeit
 from nltk import word_tokenize
 from collections import defaultdict
+import pandas as pd
+
 
 # Built referencing https://github.com/aymericdamien/TensorFlow-Examples/blob/master/examples/2_BasicModels/logistic_regression.py
 # and https://web.stanford.edu/class/cs20si/2017/lectures/notes_03.pdf
@@ -18,7 +20,7 @@ class LSTM:
         self.loss = None
 
         if hasattr(self.args, 'word_dict'):
-            self.word_dict = defaultdict(lambda: 17, self.args.word_dict)
+            self.word_dict = defaultdict(lambda: 1, self.args.word_dict)
         else:
             self.word_dict = None
 
@@ -53,9 +55,11 @@ class LSTM:
 
         count = 0
         print("Loading embeddings")
+        print("Vocab size:", self.args.vocab_size)
+
         with open(embedding_file) as f:
             for line_num, line in enumerate(f.readlines()):
-                if (line_num+1) % 10000 == 0:
+                if (line_num+1) % 100000 == 0:
                     print("Line:", line_num)
                 items = line.split()
                 word = items[0]
@@ -89,14 +93,14 @@ class LSTM:
             inputs = tf.unstack(self.embed, num=self.args.max_timesteps, axis=1)
             print("inputs shape:", self.embed.shape)
             print("single timestep shape: ", inputs[0].shape)
-            print("inputs len:",len(inputs))
+            print("inputs len:", len(inputs))
 
-            lengths = self._sequence_lengths(self.inputs)
+            self.lengths = self._sequence_lengths(self.inputs)
             outputs, state = tf.nn.static_rnn(self.lstm_cell, inputs,
-                                              sequence_length=lengths,
+                                              sequence_length=self.lengths,
                                               initial_state=self._initial_state)
 
-            index = tf.range(0, self.args.batch_size) * self.args.max_timesteps + (lengths - 1)
+            index = tf.range(0, self.args.batch_size) * self.args.max_timesteps + (self.lengths - 1)
             flat = tf.reshape(outputs, [-1, self.args.hidden_size])
             self.outputs = tf.gather(flat, index)
 
@@ -151,6 +155,7 @@ class LSTM:
         # Batch the data
         dataset = dataset.shuffle(buffer_size=25000)
         dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(self.args.batch_size))
+        dataset = dataset.prefetch(1)
 
         # Prepare our model and acquire a reference to the loss
         if self.loss is None:
@@ -201,6 +206,8 @@ class LSTM:
         step_num = 0
         saver = tf.train.Saver()
 
+        print("Starting to Train")
+
         for epoch in range(args.epochs):
             self.sess.run(iterator.initializer)
             total_cost = 0.
@@ -218,10 +225,9 @@ class LSTM:
                 except tf.errors.OutOfRangeError:
                     print("End of training dataset.")
                     break
-
                 # Train using batch data
                 summary, c, _ = self.sess.run([merged, self.loss, self.train_step], feed_dict={self.inputs: inputs,
-                                                                                self.labels: labels})
+                                                                                               self.labels: labels})
 
                 # New step
                 step_num += 1
@@ -283,6 +289,9 @@ class LSTM:
         subtotal = 0
         total_tested = 0
 
+        length_score_pred = []
+        conf_matrix = np.zeros([self.args.num_classes, self.args.num_classes])
+
         with tf.Session() as sess:
             if args.model_dir:
                 saver = tf.train.Saver()
@@ -307,11 +316,14 @@ class LSTM:
 
                     total_tested += xs.shape[0]
 
-                    cost, maxpreds, label_classes, num_correct = sess.run([loss, self.maxpreds, self.label_class, correct],
+                    cost, maxpreds, label_classes, lengths, num_correct = sess.run([loss, self.maxpreds, self.label_class, self.lengths, correct],
                                                                           feed_dict={self.inputs: xs, self.labels: ys})
 
                     total_cost += cost
                     subtotal += num_correct
+
+                    length_score_pred.append((lengths[0], label_classes[0], maxpreds[0]))
+                    conf_matrix[maxpreds[0], label_classes[0]] += 1
 
                     if batch_num % args.display_interval == 0:
                         print(label_classes)
@@ -334,11 +346,17 @@ class LSTM:
         print("Total cost:", total_cost)
         print(stop - start)
 
+        np.save("con_matrix", conf_matrix)
+        df = pd.DataFrame(length_score_pred, columns=['len', 'score', 'pred'])
+        df.to_csv('len_score_pred.csv')
+
+        return 100 * subtotal/total_tested
+
     def predict(self, docs):
         inputs = np.zeros([len(docs), self.args.max_timesteps])
         for i, doc in enumerate(docs):
-            for j, word in enumerate(word_tokenize(doc)):
-                inputs[i][j] = self.word_dict[word]
+            for j, word in enumerate(word_tokenize(doc.replace('.',' . '). replace('-', ' - '))):
+                inputs[i][j] = self.word_dict[word.lower()]
 
         label_classes = self.sess.run(self.maxpreds, feed_dict={self.inputs: inputs})
 

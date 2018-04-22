@@ -7,7 +7,7 @@ from models.logreg import LogisticRegression, LRConfig
 
 def get_model(args):
     if args.model == 'lstm':
-        args.word_dict = np.load(args.dataset[:-4]+"_dict.npy").item()
+        args.word_dict = np.load("data/lstm/train_dict.npy").item()
         args.num_classes = 10
         model = LSTM(args)
     else:
@@ -39,7 +39,7 @@ def main():
     parser.add_argument('-vocab-size', type=int, default=87798, help='number of words to embed')
     parser.add_argument('-save-dir', type=str, default='snapshot', help='where to save the snapshot')
     parser.add_argument('-model-dir', type=str, default=None, help='filename of model  [default: None]')
-    parser.add_argument('-predict', type=str    , default='', help='predict the results for the dataset')
+    parser.add_argument('-predict', type=str, default='', help='predict the results for the dataset')
     parser.add_argument('-test', action='store_true', default=False, help='train or test')
     parser.add_argument('-log-interval', type=int, default=1, help='logging rate for tensorboard')
     parser.add_argument('-display-interval', type=int, default=1, help='logging for terminal messages')

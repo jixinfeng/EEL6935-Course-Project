@@ -18,10 +18,19 @@ mkdir -p "data/lstm/"
 mkdir -p "data/logreg"
 
 echo "Generating LSTM training dataset..."
-python3 lstm_preprocess.py test  -o data/lstm/train
+python3 lstm_preprocess.py train \
+    -o data/lstm/train
+
+echo "Generating LSTM validation dataset..."
+python3 lstm_preprocess.py test \
+    -num-reviews 2500 \
+    -o data/lstm/valid \
+    -dict data/lstm/train_dict.npy
 
 echo "Generating LSTM testing dataset..."
-python3 lstm_preprocess.py train -o data/lstm/test -dict data/lstm/train_dict.npy
+python3 lstm_preprocess.py test \
+    -o data/lstm/test \
+    -dict data/lstm/train_dict.npy
 
 echo "Copying files for Logistic Regression model..."
 cp data/aclImdb/imdb.vocab data/logreg/imdb.vocab
