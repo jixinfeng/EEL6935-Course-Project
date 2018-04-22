@@ -316,13 +316,35 @@
 \subsubsection{Long Short-Term Memory (LSTM)}
 \label{model:back:lstm}
     The LSTM model was originally proposed by Sepp Hochreiter and 
-    J\"urgen Schmidhuber back in 1997\cite{hochreiter1997long}, and usually serves 
-    as a building block of larger
-    recurrent neural network (RNN) layers. The basic object of LSTM is to fine-tune
-    the memory length of the input and system state over an arbitrary period of time
-    hence preventing premature ``memory loss'' and gradient vanishing of RNN.
+    J\"urgen Schmidhuber back in 1997\cite{hochreiter1997long} aiming to solve one
+    of the biggest inherent flaw in previously proposed Recurrent Neural Networks (RNN).
+    The conventional RNN implementation doesn't handles temporal propagation of 
+    error signals very well, and in some cases, the error signals may propagate
+    back in time domain with exponential growth or attenuation. Hence whatever the
+    network tries to back-propagate, it either quickly blows up or vanished to the
+    void\cite{gers1999learning}, which called the gradient vanishing.
+    This problem stops standard RNN to learn anything from 
+    the temporal points further than 5-10 steps away, and making people doubt the real
+    potential of RNN on time-window-based learning systems. LSTM, on the other hand, is
+    able to bridge information located in much longer time span.
     
-    Given a word sequence $S=\{w_0,w_1,\ldots,w_{l-1}\}$ with length $l$, the states
+    The original implementation of LSTM allows information across arbitrary time span
+    to be stored in the cell, and same for the error signals. This enabled LSTM to 
+    pick up the information with extraordinary lags between them but may also leads to 
+    LSTM cell saturation, and fail to perform as memory cells. So the original LSTM 
+    implementation requires periodically reset to keep operational. A mechanism called
+    forget gate were proposed later to solve this problem\cite{gers1999learning}. This 
+    allowed LSTM to learn continuously without reset.
+    
+    Since then, researchers start to propose various innovative LSTM modifications.
+    Extended Karman Filter can be used for training the LSTM to solve tome pathological
+    learning cases\cite{perez2003kalman}. When implemented to operate on both temporal
+    directions, LSTM then becomes Bidirectional LSTM 
+    (Bi-LSTM)\cite{schuster1997bidirectional,barnes2017assessing}.
+    If the input and the forget gate are merged into one update gate, the modified LSTM
+    is then called Gated Recurrent Unit (GRU)\cite{cho2014learning}.
+    
+    Given a word sequence $S=\{v_0,v_1,\ldots,v_{l-1}\}$ with length $l$, the states
     of LSTM are updated as:
     $$
     \begin{bmatrix} 
@@ -340,9 +362,7 @@
     $f$ and $o$ respectively. $\sigma$ and $\circ$ are notations of logistic 
     sigmoid function and element-wise multiplication\cite{zhou2016text}.
     
-    Depending on the requirement on system causality, the LSTM can be applied on
-    both directions of time, which becomes Bidirectional LSTM 
-    (BLSTM)\cite{schuster1997bidirectional,barnes2017assessing}.
+    
 
 \subsubsection{Convolutional Neural Network}
 \label{model:back:cnn}
@@ -371,14 +391,14 @@
     \begin{equation}
     x_{1:n} = x_1 \oplus x_2 \oplus ... \oplus x_n
     \end{equation}
-    W $\oplus$ signifies concatenation. Suppose $x_{i:i+j}$ refers to concatenating
+    $\oplus$ signifies concatenation. Suppose $x_{i:i+j}$ refers to concatenating
     word vectors $x_i, x_{i+1}, ... , x_{i+j}$. The convolution operator with a filter
     $W \in \mathbb{R}^{hk}$ applied to a window size of $h$
     words is defined as
     \begin{equation}
     c_i = f(W \cdot x_{i:i_{h-1}} + b)
     \end{equation}
-    W $b$ is a bias term and $f$ signifies a non linear function such as the hyperbolic
+    $b$ is a bias term and $f$ signifies a non linear function such as the hyperbolic
     tangent. We use this filter to generate a feature map $c = [c_1, c_2, ... ,x_{n-h+1}]$
     with $c \in \mathbb{R}^{n-h+1}$ by applying the filter to each possible window of words in
     the sentence $x_{1:h}, x_{2:h+1}, ... ,x_{n-h+1:n}$.
@@ -396,23 +416,26 @@
     y = W \cdot (z \circ r) + b
     \end{equation}
 
-    w $\circ$ is the element-wise multiplication operator and $r \in \mathbb{R}^m$ is
+    $\circ$ is the element-wise multiplication operator and $r \in \mathbb{R}^m$ is
     the masking vector of Bernoulli random variables with probability $p$ of being 1.
     The gradients are backpropagated through the unmasked units during training. At test
     time, the learned weight vectors are scaled by $p$ such that $\hat{w} = pw$ and $\hat{w}$
     is used to score unseen sentences. Finally, we will constrain $l_2$-norms of the weight
     vectors by rescaling $w$ to have $||w||_2 = s$ whenever $||w||_2 > s$ after a gradient
     decent step.
+    
+    Due to the strict limitation of man-power and time, we didn't have chance to 
+    implement the CNN and compare it with other implementations.
 
 \subsection{Front End}
 \label{model:front}
     
-    Beside the system architecture described in \autoref{model:back}, we also have a
-    list of stretch goals. These include a LSTM based sentiment analysis and a 
-    web-based user interface. The detail of the stretch
-    goals are still yet to be fixed, and it will be will be included in the final project
-    report once finished. 
-
+    The system architecture described in \autoref{model:back} enlaces up to decide the
+    sentiment of movie reviews on command line interface. But since a trained network can
+    decide the sentiment of input review in a reasonably short period of time. We also
+    to build the front end of the system, so people can use the system by visiting a
+    url from web browser.
+    
 \subsubsection{Web Interface}
 \label{model:front:web}
     To improve the user-friendliness of this project, we also plan to create a 
