@@ -129,23 +129,23 @@ Department of \\
     \footnotetext{figure credit: http://www.wildml.com/2015/11/understanding-convolutional-neural-networks-for-nlp/}
 \end{frame}
 
-%\begin{frame}
-%\frametitle{Analysis Tools}
-%    \begin{columns}
-%    \begin{column}{0.5\textwidth}
-%    \center\includegraphics[width=\textwidth]{figure/sc_cnn}
-%    \end{column}
-%    \begin{column}{0.5\textwidth}
-%    \begin{itemize}
-%        \item Historically via naive Bayes, nearest neighbor, decision trees, SVM, etc.
-%        \item Build baseline model with Logistic Regression
-%        \item Implement CNN model and compare performance
-%        \item If time allows, compare with LSTM model too
-%    \end{itemize}
-%    \end{column}
-%    \end{columns}
-%    \footnotetext{figure credit: http://www.wildml.com/2015/11/understanding-convolutional-neural-networks-for-nlp/}
-%\end{frame}
+\begin{frame}
+\frametitle{Analysis Tools}
+    \begin{columns}
+    \begin{column}{0.5\textwidth}
+    \center\includegraphics[width=\textwidth]{figure/sc_cnn}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+    \begin{itemize}
+        \item Historically via naive Bayes, nearest neighbor, decision trees, SVM, etc.
+        \item Build baseline model with Logistic Regression
+        \item Implement CNN model and compare performance
+        \item If time allows, compare with LSTM model too
+    \end{itemize}
+    \end{column}
+    \end{columns}
+    \footnotetext{figure credit: http://www.wildml.com/2015/11/understanding-convolutional-neural-networks-for-nlp/}
+\end{frame}
 
 \begin{frame}
 \frametitle{Text Encoding}
@@ -179,23 +179,23 @@ Department of \\
     \end{itemize}
 \end{frame}
 
-\begin{frame}
-\frametitle{Evaluation}
-    \begin{columns}
-    \begin{column}{0.65\textwidth}
-    The performance can be measured by $F_1$ Score:
-    $$F_1=\frac{2}{\frac{1}{r}+\frac{1}{p}}=\frac{2pr}{p+r}$$
-    \begin{itemize}
-        \item Precision: $p=\frac{tpr}{tpr+fpr}$
-        \item Recall: $r=\frac{tpr}{tpr+fnr}$
-    \end{itemize}
-    \end{column}
-    \begin{column}{0.35\textwidth}
-        \center\includegraphics[width=\textwidth]{figure/precision_recall}
-    \end{column}
-    \end{columns}
-    \footnotetext{figure credit: \url{https://en.wikipedia.org/wiki/F1_score}}
-\end{frame}
+%\begin{frame}
+%\frametitle{Evaluation}
+%    \begin{columns}
+%    \begin{column}{0.65\textwidth}
+%    The performance can be measured by $F_1$ Score:
+%    $$F_1=\frac{2}{\frac{1}{r}+\frac{1}{p}}=\frac{2pr}{p+r}$$
+%    \begin{itemize}
+%        \item Precision: $p=\frac{tpr}{tpr+fpr}$
+%        \item Recall: $r=\frac{tpr}{tpr+fnr}$
+%    \end{itemize}
+%    \end{column}
+%    \begin{column}{0.35\textwidth}
+%        \center\includegraphics[width=\textwidth]{figure/precision_recall}
+%    \end{column}
+%    \end{columns}
+%    \footnotetext{figure credit: \url{https://en.wikipedia.org/wiki/F1_score}}
+%\end{frame}
 
 \begin{frame}
 \frametitle{Backend: Logistic Regression}
@@ -348,7 +348,7 @@ Department of \\
 \frametitle{Result}
     \begin{table}
         \centering
-        \caption{Initial Results from BoW Models}
+        \caption{System Performance}
         \label{my-label}
         \begin{tabularx}{\textwidth}{ X X X  X X  X }
         \toprule
@@ -378,6 +378,20 @@ Department of \\
         \end{itemize}
     \end{column}
     \end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Team Coordination}
+    \begin{itemize}
+        \item Backend: C
+        \item Frontend: J
+        \item Connecting: C
+        \item Web hosting and maintaining: J
+        \item Report writing and making slides: J
+    \end{itemize}
+    The detailed record of contribution history is maintained in the project Git repository
+    \url{https://github.com/ufjfeng/EEL6935-Course-Project} hosted on GitHub.
+    \footnotetext{C: Caleb Bryant, J: Jixin Feng}
 \end{frame}
 
 \begin{frame}
