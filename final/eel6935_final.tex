@@ -498,10 +498,40 @@
     learn to represent any out-of-vocabulary term. Since the Zipf distribution of word frequencies
     means that most text content is composed of a small number of different words, removing all
     single-occurrence words from our dataset modified less than 0.75\% of the training dataset.
+     
+    We trained two different LSTM models based on the above preprocessing methods.
+    "LSTM larger" tokenized lowercase sentences using the nltk tokenizer and had a
+    vocabulary size of 87798. "LSTM smaller" used the more aggressive punctuation tokenization
+    described above and removed words that had only occurred in the truncated reviews once
+    for a total vocabulary size of 43481.
 
    
 \subsection{Network Training}
-   
+The results reported
+    above were achieved training our model with a 20 shuffled epochs, a
+    batch size of 50, a learning rate of \num{1e-4}, and the Adam optimizer.
+    In the binomial case, our model is given training data w samples are
+    labeled only as positive (the rating is $\leq 5$) or negative (the rating is
+    $\geq 6$), and the ground truth score is hidden. We found that this slightly
+    increased our accuracy compared to predicting scores from 1-10 and
+    bucketing the scores afterwards. In the multinomial case, our model is
+    shown the complete rating and predicts scores from 1-10.
+
+
+
+    The LSTM was trained using the Adam optimizer and a learning rate of $\num{1e-3}$. We used a
+    validation set of size 2,500 for early stopping and saved the weights every 5000 steps. Each
+    batch consisted of a single training sample. All of our experiments with minibatch training 
+    quickly converged to a local minimum far from the global optimum. Our model scored highest 
+    on the validation set after two epochs of training, and we used those weights to score the test set.
+    
+    When we experimented with very large numbers of weights (removing no words from the 
+    vocabulary and using a worse tokenization function gave us a vocabulary of over 87,000),
+    our LSTM model had difficulty learning and, possibly due to parameter instability, would start
+    outputting NaN loss after approximately one epoch of training. To help stabilize the weights,
+    we added an L2 normalization of $1\time10^{-5}$ to our cost functions. While this enabled us
+    to train our model, it trained slower and had poorer results compared with our reduced vocabulary 
+    LSTM.
 
 \subsection{Front End}
 \label{model:front}
@@ -559,12 +589,14 @@
         \centering
         \caption{Initial Results from BoW Models}
         \label{my-label}
-        \begin{tabularx}{\textwidth}{ X  X  X X  X }
+        \begin{tabularx}{\textwidth}{ X X X  X X  X }
         \toprule
-        Method & Binomial Training & Binomial Testing & Multinomial Training & Multinomial Testing \\
+        Method & Epochs & Binomial Training & Binomial Testing & Multinomial Training & Multinomial Testing \\
         \midrule
-        scikit-learn LR & 0.9981 & \textbf{0.8697} & N/A & N/A \\
-        tensorflow LR & 0.8670 & 0.8583 & 0.9982 & \textbf{0.3734} \\
+        scikit-learn LR & N/A & 0.9981 & \textbf{0.8697} & N/A & N/A \\
+        tensorflow LR & 20 &  0.8670 & 0.8583 & 0.9982 & 0.3734 \\
+        larger LSTM & 8 & N/A & N/A & 0.6693 & 0.3657 \\
+        smaller LSTM  & 2 & N/A    & 0.8507 & 0.5622   & \textbf{0.4098} \\
         \bottomrule
         \end{tabularx}
     \end{table*}
@@ -573,12 +605,19 @@
     Stanford Large Movie Review data set \cite{maas2011learning}. This data
     set consists of 50,000 movie reviews and corresponding scores from IMDb.
     25,000 reviews are designated for training, and 25,000 reviews are designated for testing.
-    T are a total of 89526 unique words used in the interviews, and each
-    movie rating is an integer between 1 and 10. Using this dataset, we preform
+    Each movie rating is an integer between 1 and 10, but the reviews with a rating
+    of 5 or 6 were excluded from the dataset
+    
+    Using this dataset, we preform
     two different machine learning tasks. First, we predict whether a movie review
     has a mostly positive or mostly negative attitude towards the movie of interest. 
-    Second, we predict the score of unlabeled movie reviews from 1-10. We treat
-    both cases as instances of the multiclass classification problem.
+    Second, we predict the score of unlabeled movie reviews from 1-10.
+    
+    Logistic regression models were trained separately for binomial and multinomial
+    prediction. Since the LSTM models were  only trained 
+    for multinomial classification, predictions were thresholded for binomial 
+    classification, and accuracy would likely be improved if the model was modified
+    for 2-class classification.
     
     The whole project was coded with python 3, and our evaluation was conducted on
     a Ubuntu 14.04 LTS machine with a 3.1GHz Intel Core i7 CPU with 8MB cache,
@@ -591,29 +630,27 @@
     for both the training and testing sets of the Stanford Large Movie Review dataset.
     
 \subsection{Experiment Results}
-    In Table 1 we provide initial results for our baseline bag of words model using
-    two different machine learning toolkits. The first set of results come from
+    In Table 1 we provide the results for our baseline bag of words model using
+    two different machine learning toolkits, as well as our two different LSTM models
+    
+    For the BoW models, the first set of results come from
     using the python scikit-learn package's built in logistic regression model.
     This model relies on highly optimized logistic regression algorithms
     contained in the liblinear \cite{Fan:2008:LLL:1390681.1442794} package,
     and it quickly converged to the global minimum. Since logistic regression
     can be treated as convex optimization problem, we do not have to worry 
     about escaping local optima. We also evaluated the logistic regression
-    model using a custom tensorflow implementation. The results reported
-    above were achieved training our model with a 20 shuffled epochs, a
-    batch size of 50, a learning rate of \num{1e-4}, and the Adam optimizer.
-    In the binomial case, our model is given training data w samples are
-    labeled only as positive (the rating is $\leq 5$) or negative (the rating is
-    $\geq 6$), and the ground truth score is hidden. We found that this slightly
-    increased our accuracy compared to predicting scores from 1-10 and
-    bucketing the scores afterwards. In the multinomial case, our model is
-    shown the complete rating and predicts scores from 1-10.
-    
+    model using a custom tensorflow implementation. 
+        
     While the scikit-learn package included a highly optimized algorithm for
     preforming binomial linear regression, none of the included solvers were
     capable of handling the multinomial linear regression problem due to intensive
     memory usage. Thus we have only provided results from our tensorflow
     model in the multinomial case.
+    
+    For the LSTM models, we see that having too many parameters in the 
+    embedding matrix can have a negative impact on our model's accuracy,
+    even though many of the weights were initialized with GloVe embeddings.
     
     \begin{figure}
         \includegraphics[width=0.45\textwidth]{figure/conf_matrix}
@@ -635,7 +672,7 @@
     
 \section{Future Work}
 \label{future}
-    Sentiment analysis is a problem which can be studied from multiple angle. But due 
+    Sentiment analysis is a problem which can be studied from multiple angles. But due 
     to the time and man-power limitation, we only compared two different approaches:
     logistic regression and LSTM. In the future, we can try to implement more models used
     for sentiment analysis and compare the complexity, prediction accuracy and other
@@ -643,7 +680,7 @@
     Neural Networks (RCNN)\cite{lai2015recurrent}, Very Deep Convolutional Networks 
     (VDCN)\cite{conneau2017very}, etc.
     
-    And We only used one deep learning framework in this project. In the future, we
+    And we only used one deep learning framework in this project. In the future, we
     also aim to learn to use more frameworks like Keras\cite{chollet2015keras},
     Caffe\cite{jia2014caffe}, PyTorch\cite{paszke2017automatic}, 
     Deeplearning4j\cite{nicholson2017deeplearning4j}, etc.
