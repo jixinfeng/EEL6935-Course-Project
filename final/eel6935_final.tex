@@ -500,7 +500,7 @@
     single-occurrence words from our dataset modified less than 0.75\% of the training dataset.
      
     We trained two different LSTM models based on the above preprocessing methods.
-    "LSTM larger" tokenized lowercase sentences using the nltk tokenizer and had a
+    ``LSTM larger'' tokenized lowercase sentences using the nltk tokenizer and had a
     vocabulary size of 87798. "LSTM smaller" used the more aggressive punctuation tokenization
     described above and removed words that had only occurred in the truncated reviews once
     for a total vocabulary size of 43481.
@@ -587,7 +587,7 @@ The results reported
 \label{performance}
     \begin{table*}[]
         \centering
-        \caption{Initial Results from BoW Models}
+        \caption{Sentiment Analysis Result Comparison}
         \label{my-label}
         \begin{tabularx}{\textwidth}{ X X X  X X  X }
         \toprule
