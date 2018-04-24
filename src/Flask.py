@@ -35,18 +35,25 @@ def index():
 def result():
     if request.method == 'POST':
         form_data = request.form
-        review = form_data["review"]	
+        review = form_data["review"]
+
+        thumb_up = u"\U0001F44D"
+        thumb_down = u"\U0001F44E"
 
         if form_data["model"] == "baseline":
             score = log_reg.predict([review])[0]
         else:
             score = lstm.predict([review])[0]
 
+        if form_data["granularity"] == "binary":
+            sentiment = thumb_up if score >= 5 else thumb_down
+        else:
+            sentiment = thumb_up * (score + 1) + thumb_down * (10 - score)
+
         display_data = {"Model": form_data["model"],
                         "Granularity": form_data["granularity"],
-                        "Sentiment": score}
+                        "Sentiment": "{}\t{}".format(score + 1, sentiment)}
         return render_template("result.html", result=display_data)
-
 
 if __name__ == '__main__':
     # app.run(debug=True)
