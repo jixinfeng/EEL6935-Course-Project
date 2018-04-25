@@ -40,19 +40,19 @@ def result():
         thumb_up = u"\U0001F44D"
         thumb_down = u"\U0001F44E"
 
-        if form_data["model"] == "baseline":
+        if form_data["model"].strip() == "baseline":
             score = log_reg.predict([review])[0]
         else:
             score = lstm.predict([review])[0]
 
-        if form_data["granularity"] == "binary":
+        if form_data["granularity"].strip() == "binary":
             sentiment = thumb_up if score >= 5 else thumb_down
         else:
-            sentiment = thumb_up * (score + 1) + thumb_down * (10 - score)
+            sentiment = score
 
         display_data = {"Model": form_data["model"],
                         "Granularity": form_data["granularity"],
-                        "Sentiment": "{}\t{}".format(score + 1, sentiment)}
+                        "Sentiment": sentiment}
         return render_template("result.html", result=display_data)
 
 if __name__ == '__main__':
