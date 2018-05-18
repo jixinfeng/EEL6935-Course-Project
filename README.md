@@ -34,7 +34,6 @@ Yes, the course is called bigdata but it's about deep learning
     * Sequence to Sequence Learning with Neural Networks
     * Visualizing and Understanding Recurrent Networks
     * Learning End-to-End Goal-Oriented Dialog
-    * Learning End-to-End Goal-Oriented Dialog
     * Training RNNs as Fast as CNNs
     * Explaining and Harnessing Adversarial Examples
     * Generative Temporal Models with Memory
