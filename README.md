@@ -124,7 +124,7 @@ How much time is left for learning deep learning and programming your project? Y
 
 # The Ugly
 
-## Very limited lectures
+## Very limited lecture time
 
 You probably already wodering: with so many presentations schduled, how much time will be left for lectures? The answer is, very limited. According to this course schedule [Course Schedule](https://docs.google.com/spreadsheets/d/1M3CiaoD2gotfAdMUVtMvnxNFk2Sh5gbxsSKFbATaX30/edit?usp=sharing), number of class meetings with no lectures are:
 
@@ -158,4 +158,16 @@ I guess there is only one way to find out.
 
 YES, I AM SERIOUS! None of your homework, report nor project proposal/report will be graded. Hence no feedback about your project will be given. The only grade you'll ever receive is your final course grade. So most of what you did go directly to void/oblivion.
 
-**Still thinking about you'll survive the course? You have my best wishes, warrior.**
+# One More Thing
+
+For regular master student, this cost (tuition) of this course is ~$3,000. And the thing you get out of it is very likely to be way below what you expected. With so many material online about deep learning this is danger close to the definition of nonsensical.
+
+* [deeplearning.ai by Andrew Ng](https://www.deeplearning.ai)
+* [Machine Learning Yearning by Andrew Ng](http://www.mlyearning.org)
+* [Deep Learning by Goodfellow](http://www.deeplearningbook.org)
+* [Machine Learning Crash Course by Google](https://developers.google.com/machine-learning/crash-course/)
+* [Intro to Deep Learning by Google](https://www.udacity.com/course/deep-learning--ud730)
+* The list of classical paper above
+* ...
+
+**Still thinking about you'll survive the course? You have my best wishes.**
